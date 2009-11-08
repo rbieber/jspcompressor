@@ -1,0 +1,2 @@
+This is a version of the HTML Compressor I found on Google code that skips JSP tags (in addition to the script and 
+style tags) and strips JSP comments from the file.
