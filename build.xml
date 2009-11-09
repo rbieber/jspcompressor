@@ -23,9 +23,12 @@
                source="1.5"
         	   target="1.5">
         	<classpath>
-                <pathelement location="${lib.dir}/yuicompressor-2.4.2.jar"/>
+                <pathelement location="${lib.dir}/yuicompressor-2.4.3.jar"/>
             	<pathelement location="${lib.dir}/jsp-api.jar"/>
             	<pathelement location="${lib.dir}/velocity-1.6.2.jar"/>
+            	<pathelement location="${lib.dir}/rhino-1.6R7.jar"/>
+            	<pathelement location="${lib.dir}/jargs-1.0.jar"/>
+            	
             </classpath>
         </javac>
     </target>
@@ -48,9 +51,11 @@
 	             private="false"
 	             version="true">
 	    	<classpath>
-                <pathelement location="${lib.dir}/yuicompressor-2.4.2.jar"/>
+                <pathelement location="${lib.dir}/yuicompressor-2.4.3.jar"/>
 	    		<pathelement location="${lib.dir}/jsp-api.jar"/>
 	    		<pathelement location="${lib.dir}/velocity-1.6.2.jar"/>
+                <pathelement location="${lib.dir}/rhino-1.6R7.jar"/>
+            	<pathelement location="${lib.dir}/jargs-1.0.jar"/>
             </classpath>
 	      <sourcepath>
 	        <pathelement path="${src.dir}" />
@@ -79,5 +84,22 @@
              basedir="${build.dir}"
              includes="${dist.package.name}/**/*"/>
     </target>
+
+    <target name="test-init">
+       <path id="runclasspath">
+            <fileset dir="${user.home}/GIT/htmlcompressor/lib"> 
+                <include name="*.jar"/>
+            </fileset>
+            <fileset dir="${user.home}/GIT/htmlcompressor/build"> 
+                <include name="*.jar"/>
+            </fileset>
+        </path>    
+    </target>
+    <target name="test" depends="test-init">
+        <taskdef name="compresshtml" classname="com.googlecode.htmlcompressor.ant.task.CompressHtmlTask" classpathref="runclasspath"/>
+        <compresshtml destdir="./tmp">
+            <fileset dir="${user.home}/GIT/gcom-svn/Grainger/grainger/script_root/jsp" includes="**/*.jsp"/>
+        </compresshtml>
+    </target>    
 
 </project>
