@@ -230,7 +230,7 @@ public class HtmlCompressor implements Compressor {
 	
 	private String processHtml(String html) throws Exception {
 		//remove comments
-		if(removeComments) {
+		if(this.removeComments) {
 			html = commentPattern.matcher(html).replaceAll("");
         	html = jspCommentPattern.matcher(html).replaceAll("");
 		}

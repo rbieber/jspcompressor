@@ -85,18 +85,14 @@
              includes="${dist.package.name}/**/*"/>
     </target>
 
-    <target name="test-init">
-       <path id="runclasspath">
+    <target name="test" depends="build.jar">
+       <path id="compressor-classpath">
             <fileset dir="${user.home}/GIT/htmlcompressor/lib"> 
                 <include name="*.jar"/>
             </fileset>
-            <fileset dir="${user.home}/GIT/htmlcompressor/build"> 
-                <include name="*.jar"/>
-            </fileset>
+            <pathelement location="${build.dir}/htmlcompressor-0.7.3.jar"/>
         </path>    
-    </target>
-    <target name="test" depends="test-init">
-        <taskdef name="compresshtml" classname="com.googlecode.htmlcompressor.ant.task.CompressHtmlTask" classpathref="runclasspath"/>
+        <taskdef name="compresshtml" classname="com.googlecode.htmlcompressor.ant.task.CompressHtmlTask" classpathref="compressor-classpath"/>
         <compresshtml destdir="./tmp">
             <fileset dir="${user.home}/GIT/gcom-svn/Grainger/grainger/script_root/jsp" includes="**/*.jsp"/>
         </compresshtml>
