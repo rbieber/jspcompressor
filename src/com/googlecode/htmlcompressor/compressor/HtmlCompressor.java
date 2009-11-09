@@ -60,11 +60,11 @@ public class HtmlCompressor implements Compressor {
 	private static final String tempTextAreaBlock = "%%%COMPRESS~TEXTAREA~#%%%";
 	private static final String tempScriptBlock = "%%%COMPRESS~SCRIPT~#%%%";
 	private static final String tempStyleBlock = "%%%COMPRESS~STYLE~#%%%";
-	private static final String tempASPBlock = "%%%COMPRESS~ASP~#%%%";
+	private static final String tempJSPBlock = "%%%COMPRESS~JSP~#%%%";
 	
 	//compiled regex patterns
 	private static final Pattern commentPattern = Pattern.compile("<!--[^\\[].*?-->", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
-	private static final Pattern aspCommentPattern = Pattern.compile("<%--.+?--%>", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
+	private static final Pattern jspCommentPattern = Pattern.compile("<%--.+?--%>", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
 	private static final Pattern intertagPattern = Pattern.compile(">\\s+?<", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
 	private static final Pattern multispacePattern = Pattern.compile("\\s{2,}", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
 	private static final Pattern prePattern = Pattern.compile("<pre[^>]*?>.*?</pre>", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
@@ -74,13 +74,13 @@ public class HtmlCompressor implements Compressor {
 	private static final Pattern stylePattern = Pattern.compile("<style[^>]*?>.*?</style>", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
 	private static final Pattern scriptPatternNonEmpty = Pattern.compile("<script[^>]*?>(.+?)</script>", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
 	private static final Pattern stylePatternNonEmpty = Pattern.compile("<style[^>]*?>(.+?)</style>", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
-	private static final Pattern aspPattern = Pattern.compile("<%[^-=@](.+?)%>", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
+	private static final Pattern jspPattern = Pattern.compile("<%[^-=@](.+?)%>", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
 	
 	private static final Pattern tempPrePattern = Pattern.compile("%%%COMPRESS~PRE~(\\d+?)%%%", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
 	private static final Pattern tempTextAreaPattern = Pattern.compile("%%%COMPRESS~TEXTAREA~(\\d+?)%%%", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
 	private static final Pattern tempScriptPattern = Pattern.compile("%%%COMPRESS~SCRIPT~(\\d+?)%%%", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
 	private static final Pattern tempStylePattern = Pattern.compile("%%%COMPRESS~STYLE~(\\d+?)%%%", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
-	private static final Pattern tempASPPattern = Pattern.compile("%%%COMPRESS~ASP~(\\d+?)%%%", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
+	private static final Pattern tempJSPPattern = Pattern.compile("%%%COMPRESS~JSP~(\\d+?)%%%", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
 	
 	
 	/**
@@ -101,10 +101,10 @@ public class HtmlCompressor implements Compressor {
 		List<String> taBlocks = new ArrayList<String>();
 		List<String> scriptBlocks = new ArrayList<String>();
 		List<String> styleBlocks = new ArrayList<String>();
-		List<String> aspBlocks = new ArrayList<String>();
+		List<String> jspBlocks = new ArrayList<String>();
 		
 		//preserve blocks
-		html = preserveBlocks(html, preBlocks, taBlocks, scriptBlocks, styleBlocks, aspBlocks);
+		html = preserveBlocks(html, preBlocks, taBlocks, scriptBlocks, styleBlocks, jspBlocks);
 		
 		//process pure html
 		html = processHtml(html);
@@ -114,12 +114,12 @@ public class HtmlCompressor implements Compressor {
 		processStyleBlocks(styleBlocks);
 		
 		//put blocks back
-		html = returnBlocks(html, preBlocks, taBlocks, scriptBlocks, styleBlocks, aspBlocks);
+		html = returnBlocks(html, preBlocks, taBlocks, scriptBlocks, styleBlocks, jspBlocks);
 		
 		return html.trim();
 	}
 
-	private String preserveBlocks(String html, List<String> preBlocks, List<String> taBlocks, List<String> scriptBlocks, List<String> styleBlocks, List<String>aspBlocks) {
+	private String preserveBlocks(String html, List<String> preBlocks, List<String> taBlocks, List<String> scriptBlocks, List<String> styleBlocks, List<String>jspBlocks) {
 		//preserve PRE tags
 		Matcher matcher = prePattern.matcher(html);
 		int index = 0;
@@ -153,13 +153,13 @@ public class HtmlCompressor implements Compressor {
 		matcher.appendTail(sb);
 		html = sb.toString();
 		
-		//preserve ASP/JSP tags
-		matcher = aspPattern.matcher(html);
+		//preserve JSP tags
+		matcher = jspPattern.matcher(html);
 		index = 0;
 		sb = new StringBuffer();
 		while(matcher.find()) {
-			aspBlocks.add(matcher.group(0));
-			matcher.appendReplacement(sb, tempASPBlock.replaceFirst("#", Integer.toString(index++)));
+			jspBlocks.add(matcher.group(0));
+			matcher.appendReplacement(sb, tempJSPBlock.replaceFirst("#", Integer.toString(index++)));
 		}
 		
 		matcher.appendTail(sb);
@@ -179,7 +179,7 @@ public class HtmlCompressor implements Compressor {
 		return html;
 	}
 	
-	private String returnBlocks(String html, List<String> preBlocks, List<String> taBlocks, List<String> scriptBlocks, List<String> styleBlocks, List<String> aspBlocks) {
+	private String returnBlocks(String html, List<String> preBlocks, List<String> taBlocks, List<String> scriptBlocks, List<String> styleBlocks, List<String> jspBlocks) {
 		//put TEXTAREA blocks back
 		Matcher matcher = tempTextAreaPattern.matcher(html);
 		StringBuffer sb = new StringBuffer();
@@ -198,11 +198,11 @@ public class HtmlCompressor implements Compressor {
 		matcher.appendTail(sb);
 		html = sb.toString();
 		
-		//put ASP/JSP blocks back
-		matcher = tempASPPattern.matcher(html);
+		//put JSP blocks back
+		matcher = tempJSPPattern.matcher(html);
 		sb = new StringBuffer();
 		while(matcher.find()) {
-			matcher.appendReplacement(sb, Matcher.quoteReplacement(aspBlocks.get(Integer.parseInt(matcher.group(1)))));
+			matcher.appendReplacement(sb, Matcher.quoteReplacement(jspBlocks.get(Integer.parseInt(matcher.group(1)))));
 		}
 		matcher.appendTail(sb);
 		html = sb.toString();
@@ -232,7 +232,7 @@ public class HtmlCompressor implements Compressor {
 		//remove comments
 		if(removeComments) {
 			html = commentPattern.matcher(html).replaceAll("");
-        	html = aspCommentPattern.matcher(html).replaceAll("");
+        	html = jspCommentPattern.matcher(html).replaceAll("");
 		}
 		
 		//remove inter-tag spaces
