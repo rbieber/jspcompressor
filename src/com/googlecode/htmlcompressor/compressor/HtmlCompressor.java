@@ -101,9 +101,10 @@ public class HtmlCompressor implements Compressor {
 		List<String> taBlocks = new ArrayList<String>();
 		List<String> scriptBlocks = new ArrayList<String>();
 		List<String> styleBlocks = new ArrayList<String>();
+		List<String> aspBlocks = new ArrayList<String>();
 		
 		//preserve blocks
-		html = preserveBlocks(html, preBlocks, taBlocks, scriptBlocks, styleBlocks);
+		html = preserveBlocks(html, preBlocks, taBlocks, scriptBlocks, styleBlocks, aspBlocks);
 		
 		//process pure html
 		html = processHtml(html);
@@ -113,12 +114,12 @@ public class HtmlCompressor implements Compressor {
 		processStyleBlocks(styleBlocks);
 		
 		//put blocks back
-		html = returnBlocks(html, preBlocks, taBlocks, scriptBlocks, styleBlocks);
+		html = returnBlocks(html, preBlocks, taBlocks, scriptBlocks, styleBlocks, aspBlocks);
 		
 		return html.trim();
 	}
 
-	private String preserveBlocks(String html, List<String> preBlocks, List<String> taBlocks, List<String> scriptBlocks, List<String> styleBlocks) {
+	private String preserveBlocks(String html, List<String> preBlocks, List<String> taBlocks, List<String> scriptBlocks, List<String> styleBlocks, List<String>aspBlocks) {
 		//preserve PRE tags
 		Matcher matcher = prePattern.matcher(html);
 		int index = 0;
@@ -157,9 +158,10 @@ public class HtmlCompressor implements Compressor {
 		index = 0;
 		sb = new StringBuffer();
 		while(matcher.find()) {
-			styleBlocks.add(matcher.group(0));
+			aspBlocks.add(matcher.group(0));
 			matcher.appendReplacement(sb, tempASPBlock.replaceFirst("#", Integer.toString(index++)));
 		}
+		
 		matcher.appendTail(sb);
 		html = sb.toString();
 		
@@ -177,7 +179,7 @@ public class HtmlCompressor implements Compressor {
 		return html;
 	}
 	
-	private String returnBlocks(String html, List<String> preBlocks, List<String> taBlocks, List<String> scriptBlocks, List<String> styleBlocks) {
+	private String returnBlocks(String html, List<String> preBlocks, List<String> taBlocks, List<String> scriptBlocks, List<String> styleBlocks, List<String> aspBlocks) {
 		//put TEXTAREA blocks back
 		Matcher matcher = tempTextAreaPattern.matcher(html);
 		StringBuffer sb = new StringBuffer();
@@ -200,7 +202,7 @@ public class HtmlCompressor implements Compressor {
 		matcher = tempASPPattern.matcher(html);
 		sb = new StringBuffer();
 		while(matcher.find()) {
-			matcher.appendReplacement(sb, Matcher.quoteReplacement(styleBlocks.get(Integer.parseInt(matcher.group(1)))));
+			matcher.appendReplacement(sb, Matcher.quoteReplacement(aspBlocks.get(Integer.parseInt(matcher.group(1)))));
 		}
 		matcher.appendTail(sb);
 		html = sb.toString();
@@ -271,9 +273,12 @@ public class HtmlCompressor implements Compressor {
 		
 		//check if block is not empty
 		Matcher scriptMatcher = scriptPatternNonEmpty.matcher(source);
+		
+
 		if(scriptMatcher.find()) {
 			
 			//call YUICompressor
+		    System.out.println("Compressing Javascript (" + scriptMatcher.group(1).length() + "):  " + scriptMatcher.group(1));
 			StringWriter result = new StringWriter();
 			JavaScriptCompressor compressor = new JavaScriptCompressor(new StringReader(scriptMatcher.group(1)), null);
 			compressor.compress(result, yuiJsLineBreak, !yuiJsNoMunge, false, yuiJsPreserveAllSemiColons, yuiJsDisableOptimizations);
