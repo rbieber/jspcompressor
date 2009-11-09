@@ -278,7 +278,9 @@ public class HtmlCompressor implements Compressor {
 		if(scriptMatcher.find()) {
 			
 			//call YUICompressor
+			/*
 		    System.out.println("Compressing Javascript (" + scriptMatcher.group(1).length() + "):  " + scriptMatcher.group(1));
+			*/
 			StringWriter result = new StringWriter();
 			JavaScriptCompressor compressor = new JavaScriptCompressor(new StringReader(scriptMatcher.group(1)), null);
 			compressor.compress(result, yuiJsLineBreak, !yuiJsNoMunge, false, yuiJsPreserveAllSemiColons, yuiJsDisableOptimizations);
