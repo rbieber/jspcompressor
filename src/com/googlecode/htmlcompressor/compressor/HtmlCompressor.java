@@ -74,7 +74,7 @@ public class HtmlCompressor implements Compressor {
 	private static final Pattern stylePattern = Pattern.compile("<style[^>]*?>.*?</style>", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
 	private static final Pattern scriptPatternNonEmpty = Pattern.compile("<script[^>]*?>(.+?)</script>", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
 	private static final Pattern stylePatternNonEmpty = Pattern.compile("<style[^>]*?>(.+?)</style>", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
-	private static final Pattern jspPattern = Pattern.compile("<%[^-=@](.+?)%>", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
+	private static final Pattern jspPattern = Pattern.compile("<%[^-=@].*?%>", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
 	
 	private static final Pattern tempPrePattern = Pattern.compile("%%%COMPRESS~PRE~(\\d+?)%%%", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
 	private static final Pattern tempTextAreaPattern = Pattern.compile("%%%COMPRESS~TEXTAREA~(\\d+?)%%%", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
@@ -90,7 +90,6 @@ public class HtmlCompressor implements Compressor {
 	 * @return compressed content.
 	 * @throws Exception
 	 */
-	@Override
 	public String compress(String html) throws Exception {
 		if(!enabled || html == null || html.length() == 0) {
 			return html;
@@ -126,6 +125,7 @@ public class HtmlCompressor implements Compressor {
 		StringBuffer sb = new StringBuffer();
 		while(matcher.find()) {
 			preBlocks.add(matcher.group(0));
+			//System.out.println("PRE " + matcher.group(0) + " << END PRE");
 			matcher.appendReplacement(sb, tempPreBlock.replaceFirst("#", Integer.toString(index++)));
 		}
 		matcher.appendTail(sb);
@@ -137,6 +137,7 @@ public class HtmlCompressor implements Compressor {
 		sb = new StringBuffer();
 		while(matcher.find()) {
 			scriptBlocks.add(matcher.group(0));
+			//System.out.println("SCRIPT:  " + matcher.group(0) + "<< END SCRIPT");
 			matcher.appendReplacement(sb, tempScriptBlock.replaceFirst("#", Integer.toString(index++)));
 		}
 		matcher.appendTail(sb);
@@ -148,6 +149,7 @@ public class HtmlCompressor implements Compressor {
 		sb = new StringBuffer();
 		while(matcher.find()) {
 			styleBlocks.add(matcher.group(0));
+			//System.out.println("STYLE:  " + matcher.group(0) + "<< END STYLE");
 			matcher.appendReplacement(sb, tempStyleBlock.replaceFirst("#", Integer.toString(index++)));
 		}
 		matcher.appendTail(sb);
@@ -159,6 +161,7 @@ public class HtmlCompressor implements Compressor {
 		sb = new StringBuffer();
 		while(matcher.find()) {
 			jspBlocks.add(matcher.group(0));
+		//System.out.println("JSP:  " + matcher.group(0) + " << END JSP");
 			matcher.appendReplacement(sb, tempJSPBlock.replaceFirst("#", Integer.toString(index++)));
 		}
 		
@@ -230,6 +233,12 @@ public class HtmlCompressor implements Compressor {
 	
 	private String processHtml(String html) throws Exception {
 		//remove comments
+
+      Matcher matcher = commentPattern.matcher(html);
+      while(matcher.find()) {
+			System.out.println(matcher.group(0));	
+      }
+
 		if(this.removeComments) {
 			html = commentPattern.matcher(html).replaceAll("");
         	html = jspCommentPattern.matcher(html).replaceAll("");

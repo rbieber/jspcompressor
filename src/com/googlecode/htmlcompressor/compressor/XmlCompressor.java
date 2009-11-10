@@ -50,7 +50,6 @@ public class XmlCompressor implements Compressor {
 	 * @return compressed content.
 	 * @throws Exception
 	 */
-	@Override
 	public String compress(String xml) throws Exception {
 		if(!enabled || xml == null || xml.length() == 0) {
 			return xml;
