@@ -11,6 +11,10 @@ import org.apache.tools.ant.DirectoryScanner;
 public class CompressHtmlTask extends Task {
     private Vector filesets = new Vector();
     private String destdir = null;
+    private boolean removeComments = true;
+    private boolean removeJspComments = true;
+    private boolean compressJS = false;
+    private boolean compressCSS = true;
     
     public void setDestDir(String s) {
         destdir = s;
@@ -54,12 +58,13 @@ public class CompressHtmlTask extends Task {
         String newHTML = null;
     
         compressor.setEnabled(true); //if false all compression is off (default is true)
-        compressor.setRemoveComments(true); //if false keeps HTML comments (default is true)
+        compressor.setRemoveJspComments(this.removeJspComments);
+        compressor.setRemoveComments(this.removeComments); //if false keeps HTML comments (default is true)
         compressor.setRemoveMultiSpaces(true); //if false keeps multiple whitespace characters (default is true)
         compressor.setRemoveIntertagSpaces(true);//removes iter-tag whitespace characters
         compressor.setRemoveQuotes(false); //removes unnecessary tag attribute quotes
-        compressor.setCompressCss(true); //compress css using Yahoo YUI Compressor
-        compressor.setCompressJavaScript(false); //compress js using Yahoo YUI Compressor
+        compressor.setCompressCss(this.compressCSS); //compress css using Yahoo YUI Compressor
+        compressor.setCompressJavaScript(this.compressJS); //compress js using Yahoo YUI Compressor
         compressor.setYuiCssLineBreak(80); //--line-break param for Yahoo YUI Compressor
         compressor.setYuiJsDisableOptimizations(true); //--disable-optimizations param for Yahoo YUI Compressor
         compressor.setYuiJsLineBreak(-1); //--line-break param for Yahoo YUI Compressor
@@ -155,6 +160,22 @@ public class CompressHtmlTask extends Task {
      */
     public void addFileset(FileSet set) {
         filesets.addElement(set);
+    }
+    
+    public void setRemoveJspComments(boolean removeComments) {
+        this.removeJspComments = removeComments;
+    }
+    
+    public void setRemoveComments(boolean removeComments) {
+        this.removeComments = removeComments;
+    }
+    
+    public void setCompressJs(boolean compress) {
+        this.compressJS = compress;
+    }
+    
+    public void setCompressCSS(boolean compress) {
+        this.compressCSS = compress;
     }
 
 }

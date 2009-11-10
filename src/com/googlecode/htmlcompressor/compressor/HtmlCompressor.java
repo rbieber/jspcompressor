@@ -40,6 +40,7 @@ public class HtmlCompressor implements Compressor {
 	
 	//default settings
 	private boolean removeComments = true;
+	private boolean removeJspComments = true;
 	private boolean removeMultiSpaces = true;
 	
 	//optional settings
@@ -75,13 +76,16 @@ public class HtmlCompressor implements Compressor {
 	private static final Pattern scriptPatternNonEmpty = Pattern.compile("<script[^>]*?>(.+?)</script>", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
 	private static final Pattern stylePatternNonEmpty = Pattern.compile("<style[^>]*?>(.+?)</style>", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
 	private static final Pattern jspPattern = Pattern.compile("<%[^-=@].*?%>", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
-	
+    private static final Pattern jsLeadingSpacePattern = Pattern.compile("^[ \\t]+", Pattern.MULTILINE | Pattern.CASE_INSENSITIVE);
+    private static final Pattern jsTrailingSpacePattern = Pattern.compile("[ \\t]+$", Pattern.MULTILINE | Pattern.CASE_INSENSITIVE);
+    private static final Pattern jsEmptyLinePattern = Pattern.compile("^$\\n", Pattern.MULTILINE | Pattern.CASE_INSENSITIVE);
+    
 	private static final Pattern tempPrePattern = Pattern.compile("%%%COMPRESS~PRE~(\\d+?)%%%", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
 	private static final Pattern tempTextAreaPattern = Pattern.compile("%%%COMPRESS~TEXTAREA~(\\d+?)%%%", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
 	private static final Pattern tempScriptPattern = Pattern.compile("%%%COMPRESS~SCRIPT~(\\d+?)%%%", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
 	private static final Pattern tempStylePattern = Pattern.compile("%%%COMPRESS~STYLE~(\\d+?)%%%", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
 	private static final Pattern tempJSPPattern = Pattern.compile("%%%COMPRESS~JSP~(\\d+?)%%%", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
-	
+
 	
 	/**
 	 * The main method that compresses given HTML source and returns compressed result.
@@ -234,13 +238,11 @@ public class HtmlCompressor implements Compressor {
 	private String processHtml(String html) throws Exception {
 		//remove comments
 
-      Matcher matcher = commentPattern.matcher(html);
-      while(matcher.find()) {
-			System.out.println(matcher.group(0));	
-      }
-
 		if(this.removeComments) {
 			html = commentPattern.matcher(html).replaceAll("");
+		}
+		
+		if (this.removeJspComments) {
         	html = jspCommentPattern.matcher(html).replaceAll("");
 		}
 		
@@ -263,11 +265,15 @@ public class HtmlCompressor implements Compressor {
 	}
 	
 	private void processScriptBlocks(List<String> scriptBlocks) throws Exception {
-		if(compressJavaScript) {
-			for(int i = 0; i < scriptBlocks.size(); i++) {
-				scriptBlocks.set(i, compressJavaScript(scriptBlocks.get(i)));
-			}
-		}
+
+        for(int i = 0; i < scriptBlocks.size(); i++) {
+            String scriptBlock = scriptBlocks.get(i);
+            scriptBlock = jsLeadingSpacePattern.matcher(scriptBlock).replaceAll("");
+            scriptBlock = jsTrailingSpacePattern.matcher(scriptBlock).replaceAll("");
+            scriptBlock = jsEmptyLinePattern.matcher(scriptBlock).replaceAll("");
+            
+            scriptBlocks.set(i, (compressJavaScript ? compressJavaScript(scriptBlock) : scriptBlock));
+        }
 	}
 	
 	private void processStyleBlocks(List<String> styleBlocks) throws Exception {
@@ -287,9 +293,6 @@ public class HtmlCompressor implements Compressor {
 		if(scriptMatcher.find()) {
 			
 			//call YUICompressor
-			/*
-		    System.out.println("Compressing Javascript (" + scriptMatcher.group(1).length() + "):  " + scriptMatcher.group(1));
-			*/
 			StringWriter result = new StringWriter();
 			JavaScriptCompressor compressor = new JavaScriptCompressor(new StringReader(scriptMatcher.group(1)), null);
 			compressor.compress(result, yuiJsLineBreak, !yuiJsNoMunge, false, yuiJsPreserveAllSemiColons, yuiJsDisableOptimizations);
@@ -577,6 +580,25 @@ public class HtmlCompressor implements Compressor {
 	 */
 	public void setRemoveComments(boolean removeComments) {
 		this.removeComments = removeComments;
+	}
+
+	/**
+	 * Returns <code>true</code> if all HTML comments will be removed.
+	 * 
+	 * @return <code>true</code> if all HTML comments will be removed
+	 */
+	public boolean isRemoveJspComments() {
+		return removeJspComments;
+	}
+
+	/**
+	 * If set to <code>true</code> all HTML comments will be removed.   
+	 * Default is <code>true</code>.
+	 * 
+	 * @param removeComments set <code>true</code> to remove all HTML comments
+	 */
+	public void setRemoveJspComments(boolean removeComments) {
+		this.removeJspComments = removeComments;
 	}
 
 	/**
