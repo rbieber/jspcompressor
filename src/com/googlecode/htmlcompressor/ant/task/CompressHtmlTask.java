@@ -22,8 +22,8 @@ public class CompressHtmlTask extends Task {
     }
     
     public void setSkipStrutsFormComments(boolean skipFormComments) {
-	   leaveStrutsFormTagComments = skipFormComments;
-	}
+       leaveStrutsFormTagComments = skipFormComments;
+    }
 
     public void execute() {
        
