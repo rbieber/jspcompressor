@@ -1,2 +1,12 @@
-This is a version of the HTML Compressor I found on Google code that skips JSP tags (in addition to the script and 
-style tags) and strips JSP comments from the file.
+This is a version of the HTML Compressor I found on Google code that skips JSP tags while compressing 
+(in addition to the script and style tags) and strips JSP comments from the file.
+
+This version also includes an ANT task that can be used during an automated build process to optimize
+JSP files to remove the incessant "blank lines" that you get from JSP tag processing.
+
+Removing these extra lines in these files reduces the number of bytes that needs to be compressed and 
+downloaded to the client.
+
+TODO:
+* Document Ant task included in README
+* Document modifications made to original source specific to JSP files.
