@@ -42,7 +42,7 @@ public class HtmlCompressor implements Compressor {
     private boolean removeComments = true;
     private boolean removeJspComments = true;
     private boolean removeMultiSpaces = true;
-    private boolean leaveCommentsWithStrutsForm = false;
+    private boolean skipCommentsWithStrutsForm = false;
     
     //optional settings
     private boolean removeIntertagSpaces = false;
@@ -243,7 +243,7 @@ public class HtmlCompressor implements Compressor {
         //remove comments
 
         if(this.removeComments) {
-            if (leaveCommentsWithStrutsForm) {
+            if (skipCommentsWithStrutsForm) {
                 html = commentStrutsFormHackPattern.matcher(html).replaceAll("");
             } else {
                 html = commentPattern.matcher(html).replaceAll("");
@@ -653,7 +653,7 @@ public class HtmlCompressor implements Compressor {
     }
     
     public void setSkipStrutsFormComments(boolean leaveComments) {
-       leaveCommentsWithStrutsForm = leaveComments;
+       skipCommentsWithStrutsForm = leaveComments;
     }
     
 }
