@@ -15,10 +15,15 @@ public class CompressHtmlTask extends Task {
     private boolean removeJspComments = true;
     private boolean compressJS = false;
     private boolean compressCSS = true;
+    private boolean leaveStrutsFormTagComments = false;
     
     public void setDestDir(String s) {
         destdir = s;
     }
+    
+    public void setSkipStrutsFormComments(boolean skipFormComments) {
+	   leaveStrutsFormTagComments = skipFormComments;
+	}
 
     public void execute() {
        
@@ -70,6 +75,9 @@ public class CompressHtmlTask extends Task {
         compressor.setYuiJsLineBreak(-1); //--line-break param for Yahoo YUI Compressor
         compressor.setYuiJsNoMunge(false); //--nomunge param for Yahoo YUI Compressor
         compressor.setYuiJsPreserveAllSemiColons(true);//--preserve-semi param for Yahoo YUI Compressor
+        
+        // custom attribute to skip comments with Struts html:form TagElement
+        compressor.setSkipStrutsFormComments(leaveStrutsFormTagComments);
         
         try {
             newHTML = compressor.compress(buffer);

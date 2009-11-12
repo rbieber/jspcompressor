@@ -42,6 +42,7 @@ public class HtmlCompressor implements Compressor {
 	private boolean removeComments = true;
 	private boolean removeJspComments = true;
 	private boolean removeMultiSpaces = true;
+	private boolean leaveCommentsWithStrutsForm = false;
 	
 	//optional settings
 	private boolean removeIntertagSpaces = false;
@@ -64,7 +65,10 @@ public class HtmlCompressor implements Compressor {
 	private static final String tempJSPBlock = "%%%COMPRESS~JSP~#%%%";
 	
 	//compiled regex patterns
+	// The comment pattern purposely excludes any comment with <html:form> in it due to a work around
+	// for a struts 1.0 bug that we use. 
 	private static final Pattern commentPattern = Pattern.compile("<!--[^\\[].*?-->", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
+	private static final Pattern commentStrutsFormHackPattern = Pattern.compile("<!--[^\\[](?!<\\/*html:form.*?>).*?-->", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
 	private static final Pattern jspCommentPattern = Pattern.compile("<%--.+?--%>", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
 	private static final Pattern intertagPattern = Pattern.compile(">\\s+?<", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
 	private static final Pattern multispacePattern = Pattern.compile("\\s{2,}", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
@@ -239,7 +243,11 @@ public class HtmlCompressor implements Compressor {
 		//remove comments
 
 		if(this.removeComments) {
-			html = commentPattern.matcher(html).replaceAll("");
+            if (leaveCommentsWithStrutsForm) {
+                html = commentStrutsFormHackPattern.matcher(html).replaceAll("");
+            } else {
+    			html = commentPattern.matcher(html).replaceAll("");
+            }
 		}
 		
 		if (this.removeJspComments) {
@@ -642,6 +650,10 @@ public class HtmlCompressor implements Compressor {
 	 */
 	public void setRemoveIntertagSpaces(boolean removeIntertagSpaces) {
 		this.removeIntertagSpaces = removeIntertagSpaces;
+	}
+	
+	public void setSkipStrutsFormComments(boolean leaveComments) {
+	   leaveCommentsWithStrutsForm = leaveComments;
 	}
 	
 }
