@@ -44,7 +44,7 @@ public class CompressHtmlTask extends Task {
     public void execute() {
        
         // Validate that required properties are set 
-        if (destdir == null) {
+        if (destdir == null || destdir.length() == 0) {
             throw new BuildException("CompressHTML:  You must specify a destination directory to deposit the new files ...");
         }
         
