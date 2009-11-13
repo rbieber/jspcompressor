@@ -1,5 +1,5 @@
 This is a version of an HTML Compressor I found on Google code that has been modified to skip JSP code
-markers (<%, %>) while compressing and strips JSP comments from the file.
+markers (<%, %>) while compressing and also strips JSP comments from the file.
 
 This version also includes an ANT task that can be used during an automated build process to optimize
 JSP files to remove the incessant "blank lines" that you get from JSP tag processing.
@@ -66,7 +66,7 @@ fileset constructs.   See the ant documentation for details on their use.
 
 A Note on Javascript Compression
 --------------------------------
-Some java applications render javascript based on the state of the Java application serving the page and therefore have 
+Some java applications render javascript based on the state of the Java application serving the page and therefore have
 JSP blocks included in them.   These cause the YUI compressor to fail due to invalid syntax in Javascript.  Remember, 
 YUI actually parses the javascript - so it has to be syntactically correct.   
 

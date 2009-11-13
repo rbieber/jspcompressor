@@ -74,11 +74,20 @@ public class CompressHtmlTask extends Task {
                     p.mkdirs();
                 }
                 
-                // need to handle case here where inputFile == outputFile and throw exception without
-                // overwriting original file.
-                writeFile(d.toString(), compressHTML(readFile(f.toString(), null)), null);
+                try {
+                    String destFileName = d.getCanonicalPath();
+                    String sourceFileName = f.getCanonicalPath();
+                    
+                    if (sourceFileName.compareToIgnoreCase(destFileName) == 0) {
+                        throw new BuildException("CompressHTML:  Destination directory is included in source <fileset>, which may overwrite files in your source.");
+                    }
+                    
+                    writeFile(d.toString(), compressHTML(readFile(f.toString(), null)), null);
+                    
+                } catch (Exception myException) {
+                    throw new BuildException(myException.getMessage());
+                }
             }
-        
         }
     }
        
