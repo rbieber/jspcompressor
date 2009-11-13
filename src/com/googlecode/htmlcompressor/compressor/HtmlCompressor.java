@@ -289,18 +289,21 @@ public class HtmlCompressor implements Compressor {
     }
     
     private String compressJavaScript(String source) throws Exception {
-        
+        StringWriter result = new StringWriter();
+                
         //check if block is not empty
         Matcher scriptMatcher = scriptPatternNonEmpty.matcher(source);
-        
-
+ 
         if(scriptMatcher.find()) {
             
             //call YUICompressor
-            StringWriter result = new StringWriter();
-            JavaScriptCompressor compressor = new JavaScriptCompressor(new StringReader(scriptMatcher.group(1)), null);
-            compressor.compress(result, yuiJsLineBreak, !yuiJsNoMunge, false, yuiJsPreserveAllSemiColons, yuiJsDisableOptimizations);
-            
+            try {
+                JavaScriptCompressor compressor = new JavaScriptCompressor(new StringReader(scriptMatcher.group(1)), null);
+                compressor.compress(result, yuiJsLineBreak, !yuiJsNoMunge, false, yuiJsPreserveAllSemiColons, yuiJsDisableOptimizations);
+            } catch (Exception e) {
+                throw new Exception(e.getMessage() + "\nIn Javascript block:\n" + scriptMatcher.group(1));
+            }
+                       
             return (new StringBuilder(source.substring(0, scriptMatcher.start(1))).append(result.toString()).append(source.substring(scriptMatcher.end(1)))).toString();
         
         } else {
