@@ -7,9 +7,9 @@ JSP files to remove the incessant "blank lines" that you get from JSP tag proces
 Removing these extra lines in these files reduces the number of bytes that needs to be compressed and 
 downloaded to the client.
 
-The original version of HTMLCompressor was written by Sergiy Kovalchuk and can be found on Google code at the following URL:
-http://code.google.com/p/htmlcompressor.   Special thanks to Sergiy for releasing this under the Apache license and giving me
-a foundation to solve my problem without re-inventing the wheel.
+The original version of HTMLCompressor was written by Sergiy Kovalchuk and can be found on Google code 
+(http://code.google.com/p/htmlcompressor).  Special thanks to Sergiy for releasing this under the Apache 
+license and giving me a foundation to solve my problem without re-inventing the wheel.
 
 Ant Task Usage
 --------------
