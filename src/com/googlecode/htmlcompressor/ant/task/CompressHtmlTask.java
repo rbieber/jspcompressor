@@ -21,6 +21,7 @@ import java.util.Vector;
 import java.util.Enumeration;
 import org.apache.tools.ant.types.FileSet;
 import org.apache.tools.ant.DirectoryScanner;
+import org.apache.tools.ant.BuildException;
 
 /**
  * Ant Task that wraps the htmlcompressor library written by Sergiy Kovalchuck
@@ -42,8 +43,13 @@ public class CompressHtmlTask extends Task {
      
     public void execute() {
        
+        // Validate that required properties are set 
+        if (destdir == null) {
+            throw new BuildException("CompressHTML:  You must specify a destination directory to deposit the new files ...");
+        }
+        
         if (filesets.size() == 0) {
-            return;
+            throw new BuildException("CompressHTML:  No files specified to process for compression.");
         }
         
         Enumeration e = filesets.elements();
@@ -68,6 +74,8 @@ public class CompressHtmlTask extends Task {
                     p.mkdirs();
                 }
                 
+                // need to handle case here where inputFile == outputFile and throw exception without
+                // overwriting original file.
                 writeFile(d.toString(), compressHTML(readFile(f.toString(), null)), null);
             }
         
@@ -105,7 +113,7 @@ public class CompressHtmlTask extends Task {
         try {
             newHTML = compressor.compress(buffer);
         } catch (Exception q) {
-            q.printStackTrace();
+            throw new BuildException(q.toString());
         }
     
         return(newHTML);
@@ -156,13 +164,13 @@ public class CompressHtmlTask extends Task {
                 input.close();
             }
         } catch (Exception e) {
+            // bubble the exception message back up and stop the build.
+            throw new BuildException(e.toString());
         }
-        
-        return(null);
     }
     
     
-    private String writeFile(String path, String contents, String encoding) {
+    private void writeFile(String path, String contents, String encoding) {
         String finalString = null;
         try {
             // summary: reads a file and returns a string
@@ -180,10 +188,10 @@ public class CompressHtmlTask extends Task {
                 output.close();
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            // bubble the exception message back up and stop the build.
+            throw new BuildException(e.toString());
+            //e.printStackTrace();
         }
-        
-        return(null);
     }
     
     /**

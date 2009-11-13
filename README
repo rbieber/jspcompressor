@@ -66,10 +66,11 @@ fileset constructs.   See the ant documentation for details on their use.
 
 A Note on Javascript Compression
 --------------------------------
-Some java applications render javascript based on the state of the Java application serving the page and therefore
-have JSP blocks included in them.   These cause the YUI compressor to fail due to invalid syntax in Javascript.  Remember,
-YUI actually parses the javascript - so it has to be syntaticly correct.   If you have syntactically incorrect Javascript,
-the YUICompressor parser will fail.
+Some java applications render javascript based on the state of the Java application serving the page and therefore have 
+JSP blocks included in them.   These cause the YUI compressor to fail due to invalid syntax in Javascript.  Remember, 
+YUI actually parses the javascript - so it has to be syntactically correct.   
+
+If you have syntactically incorrect Javascript, the YUICompressor parser will fail.
 
 
 
