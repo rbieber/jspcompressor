@@ -65,10 +65,10 @@ public class HtmlCompressor implements Compressor {
     private static final String tempJSPBlock = "%%%COMPRESS~JSP~#%%%";
     
     //compiled regex patterns
-    // The comment pattern purposely excludes any comment with <html:form> in it due to a work around
+    // The commentStrutsFormHack pattern purposely excludes any comment with <html:form> in it due to a work around
     // for a struts 1.0 bug that we use. 
-    private static final Pattern commentPattern = Pattern.compile("<!--[^\\[].*?-->", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
     private static final Pattern commentStrutsFormHackPattern = Pattern.compile("<!--[^\\[](?!<\\/*html:form.*?>).*?-->", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
+    private static final Pattern commentPattern = Pattern.compile("<!--[^\\[].*?-->", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
     private static final Pattern jspCommentPattern = Pattern.compile("<%--.+?--%>", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
     private static final Pattern intertagPattern = Pattern.compile(">\\s+?<", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
     private static final Pattern multispacePattern = Pattern.compile("\\s{2,}", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
@@ -79,6 +79,7 @@ public class HtmlCompressor implements Compressor {
     private static final Pattern stylePattern = Pattern.compile("<style[^>]*?>.*?</style>", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
     private static final Pattern scriptPatternNonEmpty = Pattern.compile("<script[^>]*?>(.+?)</script>", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
     private static final Pattern stylePatternNonEmpty = Pattern.compile("<style[^>]*?>(.+?)</style>", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
+    // JSP and js block patterns used to strip leading and trailing space, as well as empty lines.
     private static final Pattern jspPattern = Pattern.compile("<%[^-=@].*?%>", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
     private static final Pattern jsLeadingSpacePattern = Pattern.compile("^[ \\t]+", Pattern.MULTILINE | Pattern.CASE_INSENSITIVE);
     private static final Pattern jsTrailingSpacePattern = Pattern.compile("[ \\t]+$", Pattern.MULTILINE | Pattern.CASE_INSENSITIVE);
@@ -133,7 +134,6 @@ public class HtmlCompressor implements Compressor {
         StringBuffer sb = new StringBuffer();
         while(matcher.find()) {
             preBlocks.add(matcher.group(0));
-            //System.out.println("PRE " + matcher.group(0) + " << END PRE");
             matcher.appendReplacement(sb, tempPreBlock.replaceFirst("#", Integer.toString(index++)));
         }
         matcher.appendTail(sb);
@@ -145,7 +145,6 @@ public class HtmlCompressor implements Compressor {
         sb = new StringBuffer();
         while(matcher.find()) {
             scriptBlocks.add(matcher.group(0));
-            //System.out.println("SCRIPT:  " + matcher.group(0) + "<< END SCRIPT");
             matcher.appendReplacement(sb, tempScriptBlock.replaceFirst("#", Integer.toString(index++)));
         }
         matcher.appendTail(sb);
@@ -157,7 +156,6 @@ public class HtmlCompressor implements Compressor {
         sb = new StringBuffer();
         while(matcher.find()) {
             styleBlocks.add(matcher.group(0));
-            //System.out.println("STYLE:  " + matcher.group(0) + "<< END STYLE");
             matcher.appendReplacement(sb, tempStyleBlock.replaceFirst("#", Integer.toString(index++)));
         }
         matcher.appendTail(sb);
@@ -169,7 +167,6 @@ public class HtmlCompressor implements Compressor {
         sb = new StringBuffer();
         while(matcher.find()) {
             jspBlocks.add(matcher.group(0));
-        //System.out.println("JSP:  " + matcher.group(0) + " << END JSP");
             matcher.appendReplacement(sb, tempJSPBlock.replaceFirst("#", Integer.toString(index++)));
         }
         
@@ -240,8 +237,7 @@ public class HtmlCompressor implements Compressor {
     }
     
     private String processHtml(String html) throws Exception {
-        //remove comments
-
+        // remove comments and JSP comments, if specified.
         if(this.removeComments) {
             if (skipCommentsWithStrutsForm) {
                 html = commentStrutsFormHackPattern.matcher(html).replaceAll("");
@@ -651,7 +647,17 @@ public class HtmlCompressor implements Compressor {
     public void setRemoveIntertagSpaces(boolean removeIntertagSpaces) {
         this.removeIntertagSpaces = removeIntertagSpaces;
     }
-    
+
+    /**
+     * If set to <code>true</code> comments with the <html:form> opening and closing tags will be skipped
+     * during comment removal.  This is a workaround for a Struts 1.0 bug, in which there were issues
+     * with this tag that caused other form fields to work improperly.   The workaround was to put the
+     * <html:tag> opening and closing tags in comments which caused the proper structures to (for some reason)
+     * still be initialized properly, but did not use the tag, and  then to use standard for tags around your
+     * struts controls.   Kind of odd, but thats how it works.
+     *
+     * @return Nothing
+     */    
     public void setSkipStrutsFormComments(boolean leaveComments) {
        skipCommentsWithStrutsForm = leaveComments;
     }

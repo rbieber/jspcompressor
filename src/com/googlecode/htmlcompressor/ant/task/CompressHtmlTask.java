@@ -1,5 +1,19 @@
 package com.googlecode.htmlcompressor.ant.task;
 
+/*
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+ 
 import org.apache.tools.ant.Task;
 import com.googlecode.htmlcompressor.compressor.*;
 import java.io.*;
@@ -8,6 +22,11 @@ import java.util.Enumeration;
 import org.apache.tools.ant.types.FileSet;
 import org.apache.tools.ant.DirectoryScanner;
 
+/**
+ * Ant Task that wraps the htmlcompressor library written by Sergiy Kovalchuck
+ * 
+ * @author <a href="mailto:ron@bieberlabs.com">Ron Bieber</a>
+ */
 public class CompressHtmlTask extends Task {
     private Vector filesets = new Vector();
     private String destdir = null;
@@ -17,14 +36,10 @@ public class CompressHtmlTask extends Task {
     private boolean compressCSS = true;
     private boolean skipStrutsFormTagComments = false;
     
-    public void setDestDir(String s) {
-        destdir = s;
-    }
-    
-    public void setSkipStrutsFormComments(boolean skipFormComments) {
-       skipStrutsFormTagComments = skipFormComments;
-    }
-
+    /**
+     * Main execution function of the Ant Task.
+     */
+     
     public void execute() {
        
         if (filesets.size() == 0) {
@@ -39,6 +54,7 @@ public class CompressHtmlTask extends Task {
             
             String[] includedFiles = ds.getIncludedFiles();
 
+            // Show a message so the user knows we're actually doing something.
             log("Compressing " + includedFiles.length + " files to " + this.destdir + " ...");
                 
             
@@ -58,6 +74,13 @@ public class CompressHtmlTask extends Task {
         }
     }
        
+    /**
+     * Function called by the main execute function that does the actual compression of HTML
+     * using the HTMLCompressor class.
+     *
+     * @param buffer This is the full HTML buffer to compress.
+     * @return Compressed html buffer     
+     */
     private String compressHTML(String buffer) {
         HtmlCompressor compressor = new HtmlCompressor();
         String newHTML = null;
@@ -164,26 +187,79 @@ public class CompressHtmlTask extends Task {
     }
     
     /**
-     *  A set of files to upload or download
-     */
+     * Sets the fileset property that signifies the collection of files to be compressed by this 
+     * invocation of the task.
+     * 
+     * @param set Ant FileSet object.
+     * @return nothing
+     */     
+     
     public void addFileset(FileSet set) {
         filesets.addElement(set);
     }
-    
+ 
+    /**
+     * Sets the property that causes the compressor to remove JSP comments from the files processed.
+     * 
+     * @param compress true if JSP comments should be removed, false otherwise.
+     * @return nothing
+     */ 
+        
     public void setRemoveJspComments(boolean removeComments) {
         this.removeJspComments = removeComments;
     }
     
+    
+    /**
+     * Sets the property that causes the compressor to remove HTML comments from the files processed.
+     * 
+     * @param compress true if comments should be removed, false otherwise.
+     * @return nothing
+     */ 
     public void setRemoveComments(boolean removeComments) {
         this.removeComments = removeComments;
     }
     
+    /**
+     * Sets the property that causes the compressor to compress inline Javascript with the YUI compressor.  
+     * This is false by default.
+     * 
+     * @param compress true if inline Javascript compression should be compressed, false otherwise.
+     * @return nothing
+     */        
     public void setCompressJs(boolean compress) {
         this.compressJS = compress;
     }
     
+    /**
+     * Sets the property that causes the compressor compress CSS with the YUI compressor.  
+     * This is true by default.
+     * 
+     * @param compress true if CSS compression is to be used, false otherwise.
+     * @return nothing
+     */       
     public void setCompressCSS(boolean compress) {
         this.compressCSS = compress;
     }
-
+    
+    /**
+     * Sets the destination directory in which processed files are deposited.
+     * 
+     * @param destpath path of directory in which to deposit processed files
+     * @return nothing
+     */    
+    public void setDestDir(String destpath) {
+        destdir = destpath;
+    }
+    
+    /**
+     * Sets the property that causes the compressor to leave HTML comments that 
+     * reference the Struts <html:form> tags.
+     * 
+     * @param skipFormComments true if <html:form> comments are to be skipped, false if they should be removed.
+     * @return nothing
+     */    
+    public void setSkipStrutsFormComments(boolean skipFormComments) {
+       skipStrutsFormTagComments = skipFormComments;
+    }
 }
