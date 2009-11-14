@@ -42,7 +42,6 @@ public class CompressHtmlTask extends Task {
      */
      
     public void execute() {
-        String sourceFileName = null, destFileName = null;
        
         // Validate that required properties are set 
         if (destdir == null || destdir.length() == 0) {
@@ -76,8 +75,8 @@ public class CompressHtmlTask extends Task {
                 }
                 
                 try {
-                    destFileName = d.getCanonicalPath();
-                    sourceFileName = f.getCanonicalPath();
+                    String destFileName = d.getCanonicalPath();
+                    String sourceFileName = f.getCanonicalPath();
                     
                     if (sourceFileName.compareToIgnoreCase(destFileName) == 0) {
                         throw new BuildException("CompressHTML:  Destination directory is included in source <fileset>, which may overwrite files in your source.");
@@ -86,7 +85,7 @@ public class CompressHtmlTask extends Task {
                     writeFile(d.toString(), compressHTML(readFile(f.toString(), null)), null);
                     
                 } catch (Exception myException) {
-                    throw new BuildException(myException.getMessage() + " while processing file " + sourceFileName);
+                    throw new BuildException(myException.getMessage());
                 }
             }
         }
@@ -112,7 +111,7 @@ public class CompressHtmlTask extends Task {
         compressor.setCompressCss(this.compressCSS); //compress css using Yahoo YUI Compressor
         compressor.setCompressJavaScript(this.compressJS); //compress js using Yahoo YUI Compressor
         compressor.setYuiCssLineBreak(80); //--line-break param for Yahoo YUI Compressor
-        compressor.setYuiJsDisableOptimizations(false); //--disable-optimizations param for Yahoo YUI Compressor
+        compressor.setYuiJsDisableOptimizations(true); //--disable-optimizations param for Yahoo YUI Compressor
         compressor.setYuiJsLineBreak(-1); //--line-break param for Yahoo YUI Compressor
         compressor.setYuiJsNoMunge(false); //--nomunge param for Yahoo YUI Compressor
         compressor.setYuiJsPreserveAllSemiColons(true);//--preserve-semi param for Yahoo YUI Compressor

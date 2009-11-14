@@ -10,7 +10,6 @@
     </target>
 
     <target name="-init" depends="-load.properties,clean">
-        <delete dir="tmp"/>
         <mkdir dir="${build.dir}"/>
     </target>
 
@@ -106,11 +105,13 @@
 
     <target name="test" depends="build.jar">
        <path id="compressor-classpath">
-            <pathelement location="${lib.dir}/yuicompressor-2.4.3.jar"/>
+            <fileset dir="./lib"> 
+                <include name="*.jar"/>
+            </fileset>
             <pathelement location="${build.dir}/htmlcompressor-0.7.3.jar"/>
         </path>    
         <taskdef name="compresshtml" classname="com.googlecode.htmlcompressor.ant.task.CompressHtmlTask" classpathref="compressor-classpath"/>
-        <compresshtml destdir="./tmp" compressjs="true" removecomments="true" removejspcomments="true" skipstrutsformcomments="true">
+        <compresshtml destdir="./tmp" compressjs="false" removecomments="true" removejspcomments="true" skipstrutsformcomments="true">
             <fileset dir="testsrc" includes="**/*.jsp"/>
         </compresshtml>
     </target>    

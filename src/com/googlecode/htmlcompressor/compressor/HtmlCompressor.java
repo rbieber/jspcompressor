@@ -49,7 +49,6 @@ public class HtmlCompressor implements Compressor {
     private boolean removeQuotes = false;
     private boolean compressJavaScript = false;
     private boolean compressCss = false;
-    private boolean debugMode = false;
     
     //YUICompressor settings
     private boolean yuiJsNoMunge = false;
@@ -68,7 +67,6 @@ public class HtmlCompressor implements Compressor {
     //compiled regex patterns
     // The commentStrutsFormHack pattern purposely excludes any comment with <html:form> in it due to a work around
     // for a struts 1.0 bug that we use. 
-    private static final Pattern commentMarkersInScript = Pattern.compile("(<!--)|(\\/\\/-->)", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
     private static final Pattern commentStrutsFormHackPattern = Pattern.compile("<!--[^\\[](?!<\\/*html:form.*?>).*?-->", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
     private static final Pattern commentPattern = Pattern.compile("<!--[^\\[].*?-->", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
     private static final Pattern jspCommentPattern = Pattern.compile("<%--.+?--%>", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
@@ -77,11 +75,10 @@ public class HtmlCompressor implements Compressor {
     private static final Pattern prePattern = Pattern.compile("<pre[^>]*?>.*?</pre>", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
     private static final Pattern taPattern = Pattern.compile("<textarea[^>]*?>.*?</textarea>", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
     private static final Pattern tagquotePattern = Pattern.compile("\\s*=\\s*([\"'])([a-z0-9-_]+?)\\1(?=[^<]*?>)", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
-    private static final Pattern scriptPattern = Pattern.compile("<script[^>]*?[^%]*>.+?</script>", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
+    private static final Pattern scriptPattern = Pattern.compile("<script[^>]*?>.*?</script>", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
     private static final Pattern stylePattern = Pattern.compile("<style[^>]*?>.*?</style>", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
     private static final Pattern scriptPatternNonEmpty = Pattern.compile("<script[^>]*?>(.+?)</script>", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
     private static final Pattern stylePatternNonEmpty = Pattern.compile("<style[^>]*?>(.+?)</style>", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
-    
     // JSP and js block patterns used to strip leading and trailing space, as well as empty lines.
     private static final Pattern jspPattern = Pattern.compile("<%[^-=@].*?%>", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
     private static final Pattern jsLeadingSpacePattern = Pattern.compile("^[ \\t]+", Pattern.MULTILINE | Pattern.CASE_INSENSITIVE);
@@ -275,20 +272,11 @@ public class HtmlCompressor implements Compressor {
 
         for(int i = 0; i < scriptBlocks.size(); i++) {
             String scriptBlock = scriptBlocks.get(i);
+            scriptBlock = jsLeadingSpacePattern.matcher(scriptBlock).replaceAll("");
+            scriptBlock = jsTrailingSpacePattern.matcher(scriptBlock).replaceAll("");
+            scriptBlock = jsEmptyLinePattern.matcher(scriptBlock).replaceAll("");
             
-            // Remove any JSP comments that might be in the javascript for security reasons
-            // (developer only comments, etc)
-            scriptBlock = jspCommentPattern.matcher(scriptBlock).replaceAll("");
-
-            if (!compressJavaScript) {
-                scriptBlock = jsLeadingSpacePattern.matcher(scriptBlock).replaceAll("");
-                scriptBlock = jsTrailingSpacePattern.matcher(scriptBlock).replaceAll("");
-                scriptBlock = jsEmptyLinePattern.matcher(scriptBlock).replaceAll("");
-            } else {
-                scriptBlock = compressJavaScript(scriptBlock);
-            }
-            
-            scriptBlocks.set(i, scriptBlock);
+            scriptBlocks.set(i, (compressJavaScript ? compressJavaScript(scriptBlock) : scriptBlock));
         }
     }
     
@@ -302,7 +290,6 @@ public class HtmlCompressor implements Compressor {
     
     private String compressJavaScript(String source) throws Exception {
         StringWriter result = new StringWriter();
-        String originalSource = source;
                 
         //check if block is not empty
         Matcher scriptMatcher = scriptPatternNonEmpty.matcher(source);
@@ -311,15 +298,10 @@ public class HtmlCompressor implements Compressor {
             
             //call YUICompressor
             try {
-                source = commentMarkersInScript.matcher(source).replaceAll("");
                 JavaScriptCompressor compressor = new JavaScriptCompressor(new StringReader(scriptMatcher.group(1)), null);
                 compressor.compress(result, yuiJsLineBreak, !yuiJsNoMunge, false, yuiJsPreserveAllSemiColons, yuiJsDisableOptimizations);
             } catch (Exception e) {
-                if (debugMode) {
-                    System.out.println(e.getMessage() + "\nIn Javascript block:\n" + scriptMatcher.group(1));
-                }
-                source = originalSource;
-                //throw new Exception(e.getMessage() + "\nIn Javascript block:\n" + scriptMatcher.group(1));
+                throw new Exception(e.getMessage() + "\nIn Javascript block:\n" + scriptMatcher.group(1));
             }
                        
             return (new StringBuilder(source.substring(0, scriptMatcher.start(1))).append(result.toString()).append(source.substring(scriptMatcher.end(1)))).toString();
@@ -681,10 +663,6 @@ public class HtmlCompressor implements Compressor {
      */    
     public void setSkipStrutsFormComments(boolean leaveComments) {
        skipCommentsWithStrutsForm = leaveComments;
-    }
-    
-    public void setDebug(boolean debugMode) {
-        this.debugMode = debugMode;
     }
     
 }
