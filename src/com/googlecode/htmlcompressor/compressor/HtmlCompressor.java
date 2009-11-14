@@ -64,6 +64,7 @@ public class HtmlCompressor implements Compressor {
     private static final String tempScriptBlock = "%%%COMPRESS~SCRIPT~#%%%";
     private static final String tempStyleBlock = "%%%COMPRESS~STYLE~#%%%";
     private static final String tempJSPBlock = "%%%COMPRESS~JSP~#%%%";
+    private static final String tempJSPAssignBlock = "%%%COMPRESS~JSPASSIGN~#%%%";
     
     //compiled regex patterns
     // The commentStrutsFormHack pattern purposely excludes any comment with <html:form> in it due to a work around
@@ -77,12 +78,13 @@ public class HtmlCompressor implements Compressor {
     private static final Pattern prePattern = Pattern.compile("<pre[^>]*?>.*?</pre>", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
     private static final Pattern taPattern = Pattern.compile("<textarea[^>]*?>.*?</textarea>", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
     private static final Pattern tagquotePattern = Pattern.compile("\\s*=\\s*([\"'])([a-z0-9-_]+?)\\1(?=[^<]*?>)", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
-    private static final Pattern scriptPattern = Pattern.compile("<script[^>]*?[^%]*>.+?</script>", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
+    private static final Pattern scriptPattern = Pattern.compile("<script[^>]*?>.*?</script>", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
     private static final Pattern stylePattern = Pattern.compile("<style[^>]*?>.*?</style>", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
     private static final Pattern scriptPatternNonEmpty = Pattern.compile("<script[^>]*?>(.+?)</script>", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
     private static final Pattern stylePatternNonEmpty = Pattern.compile("<style[^>]*?>(.+?)</style>", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
     
     // JSP and js block patterns used to strip leading and trailing space, as well as empty lines.
+    private static final Pattern jspAssignPattern = Pattern.compile("<%=.*?%>", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
     private static final Pattern jspPattern = Pattern.compile("<%[^-=@].*?%>", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
     private static final Pattern jsLeadingSpacePattern = Pattern.compile("^[ \\t]+", Pattern.MULTILINE | Pattern.CASE_INSENSITIVE);
     private static final Pattern jsTrailingSpacePattern = Pattern.compile("[ \\t]+$", Pattern.MULTILINE | Pattern.CASE_INSENSITIVE);
@@ -93,6 +95,7 @@ public class HtmlCompressor implements Compressor {
     private static final Pattern tempScriptPattern = Pattern.compile("%%%COMPRESS~SCRIPT~(\\d+?)%%%", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
     private static final Pattern tempStylePattern = Pattern.compile("%%%COMPRESS~STYLE~(\\d+?)%%%", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
     private static final Pattern tempJSPPattern = Pattern.compile("%%%COMPRESS~JSP~(\\d+?)%%%", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
+    private static final Pattern tempJSPAssignPattern = Pattern.compile("%%%COMPRESS~JSPASSIGN~(\\d+?)%%%", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
 
     
     /**
@@ -113,9 +116,9 @@ public class HtmlCompressor implements Compressor {
         List<String> scriptBlocks = new ArrayList<String>();
         List<String> styleBlocks = new ArrayList<String>();
         List<String> jspBlocks = new ArrayList<String>();
-        
+        List<String> jspAssignBlocks = new ArrayList<String>();
         //preserve blocks
-        html = preserveBlocks(html, preBlocks, taBlocks, scriptBlocks, styleBlocks, jspBlocks);
+        html = preserveBlocks(html, preBlocks, taBlocks, scriptBlocks, styleBlocks, jspBlocks, jspAssignBlocks);
         
         //process pure html
         html = processHtml(html);
@@ -125,16 +128,46 @@ public class HtmlCompressor implements Compressor {
         processStyleBlocks(styleBlocks);
         
         //put blocks back
-        html = returnBlocks(html, preBlocks, taBlocks, scriptBlocks, styleBlocks, jspBlocks);
+        html = returnBlocks(html, preBlocks, taBlocks, scriptBlocks, styleBlocks, jspBlocks, jspAssignBlocks);
         
         return html.trim();
     }
 
-    private String preserveBlocks(String html, List<String> preBlocks, List<String> taBlocks, List<String> scriptBlocks, List<String> styleBlocks, List<String>jspBlocks) {
+    
+    private String preserveBlocks(String html, List<String> preBlocks, List<String> taBlocks, List<String> scriptBlocks, List<String> styleBlocks, List<String>jspBlocks, List<String>jspAssignBlocks) {
+        Matcher matcher = null;
+        int index;
+        StringBuffer sb = null;
+
+        //preserve JSP variable reference tags
+        matcher = jspAssignPattern.matcher(html);
+        index = 0;
+        sb = new StringBuffer();
+        while(matcher.find()) {
+            jspAssignBlocks.add(matcher.group(0));
+            matcher.appendReplacement(sb, tempJSPAssignBlock.replaceFirst("#", Integer.toString(index++)));
+        }
+        
+        matcher.appendTail(sb);
+        html = sb.toString();
+        
+        //preserve JSP tags
+        matcher = jspPattern.matcher(html);
+        index = 0;
+        sb = new StringBuffer();
+        while(matcher.find()) {
+            jspBlocks.add(matcher.group(0));
+            matcher.appendReplacement(sb, tempJSPBlock.replaceFirst("#", Integer.toString(index++)));
+        }
+        
+        matcher.appendTail(sb);
+        html = sb.toString();
+        
         //preserve PRE tags
-        Matcher matcher = prePattern.matcher(html);
-        int index = 0;
-        StringBuffer sb = new StringBuffer();
+        matcher = prePattern.matcher(html);
+        
+        index = 0;
+        sb = new StringBuffer();
         while(matcher.find()) {
             preBlocks.add(matcher.group(0));
             matcher.appendReplacement(sb, tempPreBlock.replaceFirst("#", Integer.toString(index++)));
@@ -150,6 +183,7 @@ public class HtmlCompressor implements Compressor {
             scriptBlocks.add(matcher.group(0));
             matcher.appendReplacement(sb, tempScriptBlock.replaceFirst("#", Integer.toString(index++)));
         }
+        
         matcher.appendTail(sb);
         html = sb.toString();
 
@@ -161,18 +195,6 @@ public class HtmlCompressor implements Compressor {
             styleBlocks.add(matcher.group(0));
             matcher.appendReplacement(sb, tempStyleBlock.replaceFirst("#", Integer.toString(index++)));
         }
-        matcher.appendTail(sb);
-        html = sb.toString();
-        
-        //preserve JSP tags
-        matcher = jspPattern.matcher(html);
-        index = 0;
-        sb = new StringBuffer();
-        while(matcher.find()) {
-            jspBlocks.add(matcher.group(0));
-            matcher.appendReplacement(sb, tempJSPBlock.replaceFirst("#", Integer.toString(index++)));
-        }
-        
         matcher.appendTail(sb);
         html = sb.toString();
         
@@ -190,7 +212,7 @@ public class HtmlCompressor implements Compressor {
         return html;
     }
     
-    private String returnBlocks(String html, List<String> preBlocks, List<String> taBlocks, List<String> scriptBlocks, List<String> styleBlocks, List<String> jspBlocks) {
+    private String returnBlocks(String html, List<String> preBlocks, List<String> taBlocks, List<String> scriptBlocks, List<String> styleBlocks, List<String> jspBlocks, List<String> jspAssignBlocks) {
         //put TEXTAREA blocks back
         Matcher matcher = tempTextAreaPattern.matcher(html);
         StringBuffer sb = new StringBuffer();
@@ -209,15 +231,6 @@ public class HtmlCompressor implements Compressor {
         matcher.appendTail(sb);
         html = sb.toString();
         
-        //put JSP blocks back
-        matcher = tempJSPPattern.matcher(html);
-        sb = new StringBuffer();
-        while(matcher.find()) {
-            matcher.appendReplacement(sb, Matcher.quoteReplacement(jspBlocks.get(Integer.parseInt(matcher.group(1)))));
-        }
-        matcher.appendTail(sb);
-        html = sb.toString();
-
         //put SCRIPT blocks back
         matcher = tempScriptPattern.matcher(html);
         sb = new StringBuffer();
@@ -236,6 +249,23 @@ public class HtmlCompressor implements Compressor {
         matcher.appendTail(sb);
         html = sb.toString();
         
+        //put JSP blocks back
+        matcher = tempJSPPattern.matcher(html);
+        sb = new StringBuffer();
+        while(matcher.find()) {
+            matcher.appendReplacement(sb, Matcher.quoteReplacement(jspBlocks.get(Integer.parseInt(matcher.group(1)))));
+        }
+        matcher.appendTail(sb);
+        html = sb.toString();
+        
+        //put variable reference blocks back
+        matcher = tempJSPAssignPattern.matcher(html);
+        sb = new StringBuffer();
+        while(matcher.find()) {
+            matcher.appendReplacement(sb, Matcher.quoteReplacement(jspAssignBlocks.get(Integer.parseInt(matcher.group(1)))));
+        }
+        matcher.appendTail(sb);
+        html = sb.toString();
         return html;
     }
     
@@ -302,8 +332,9 @@ public class HtmlCompressor implements Compressor {
     
     private String compressJavaScript(String source) throws Exception {
         StringWriter result = new StringWriter();
-        String originalSource = source;
-                
+        String originalSource = new String(source);
+
+        source = commentMarkersInScript.matcher(source).replaceAll("");                
         //check if block is not empty
         Matcher scriptMatcher = scriptPatternNonEmpty.matcher(source);
  
@@ -311,17 +342,25 @@ public class HtmlCompressor implements Compressor {
             
             //call YUICompressor
             try {
-                source = commentMarkersInScript.matcher(source).replaceAll("");
+                if (debugMode) {
+                    System.out.println("\n---- COMPRESSING ---- \n" + source + "\n------\n");
+                }
+                
                 JavaScriptCompressor compressor = new JavaScriptCompressor(new StringReader(scriptMatcher.group(1)), null);
                 compressor.compress(result, yuiJsLineBreak, !yuiJsNoMunge, false, yuiJsPreserveAllSemiColons, yuiJsDisableOptimizations);
             } catch (Exception e) {
                 if (debugMode) {
                     System.out.println(e.getMessage() + "\nIn Javascript block:\n" + scriptMatcher.group(1));
+                    System.out.println("Returning " + source);
+                    throw new Exception(e.getMessage() + "\nIn Javascript block:\n" + scriptMatcher.group(1));
                 }
-                source = originalSource;
-                //throw new Exception(e.getMessage() + "\nIn Javascript block:\n" + scriptMatcher.group(1));
+          
+                return(originalSource);
             }
-                       
+
+            if (debugMode) {              
+                System.out.println(source.substring(0, scriptMatcher.start(1)) + result.toString() + source.substring(scriptMatcher.end(1)));  
+            }      
             return (new StringBuilder(source.substring(0, scriptMatcher.start(1))).append(result.toString()).append(source.substring(scriptMatcher.end(1)))).toString();
         
         } else {
@@ -683,7 +722,7 @@ public class HtmlCompressor implements Compressor {
        skipCommentsWithStrutsForm = leaveComments;
     }
     
-    public void setDebug(boolean debugMode) {
+    public void setDebugMode(boolean debugMode) {
         this.debugMode = debugMode;
     }
     
