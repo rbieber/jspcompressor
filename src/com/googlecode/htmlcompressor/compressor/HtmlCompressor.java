@@ -70,7 +70,7 @@ public class HtmlCompressor implements Compressor {
     // The commentStrutsFormHack pattern purposely excludes any comment with <html:form> in it due to a work around
     // for a struts 1.0 bug that we use. 
     private static final Pattern commentMarkersInScript = Pattern.compile("(<!--)|(\\/\\/-->)", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
-    private static final Pattern commentStrutsFormHackPattern = Pattern.compile("<!--[^\\[](?!<\\/*html:form.*?>).*?-->", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
+    private static final Pattern commentStrutsFormHackPattern = Pattern.compile("<!--[^\\[](?!.*?html:form.*?).*?-->", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
     private static final Pattern commentPattern = Pattern.compile("<!--[^\\[].*?-->", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
     private static final Pattern jspCommentPattern = Pattern.compile("<%--.+?--%>", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
     private static final Pattern intertagPattern = Pattern.compile(">\\s+?<", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);

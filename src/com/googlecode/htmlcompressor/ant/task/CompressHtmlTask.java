@@ -105,13 +105,13 @@ public class CompressHtmlTask extends Task {
         String newHTML = null;
     
         compressor.setEnabled(true); //if false all compression is off (default is true)
-        compressor.setRemoveJspComments(this.removeJspComments);
-        compressor.setRemoveComments(this.removeComments); //if false keeps HTML comments (default is true)
+        compressor.setRemoveJspComments(removeJspComments);
+        compressor.setRemoveComments(removeComments); //if false keeps HTML comments (default is true)
         compressor.setRemoveMultiSpaces(true); //if false keeps multiple whitespace characters (default is true)
         compressor.setRemoveIntertagSpaces(true);//removes iter-tag whitespace characters
         compressor.setRemoveQuotes(false); //removes unnecessary tag attribute quotes
-        compressor.setCompressCss(this.compressCSS); //compress css using Yahoo YUI Compressor
-        compressor.setCompressJavaScript(this.compressJS); //compress js using Yahoo YUI Compressor
+        compressor.setCompressCss(compressCSS); //compress css using Yahoo YUI Compressor
+        compressor.setCompressJavaScript(compressJS); //compress js using Yahoo YUI Compressor
         compressor.setYuiCssLineBreak(80); //--line-break param for Yahoo YUI Compressor
         compressor.setYuiJsDisableOptimizations(false); //--disable-optimizations param for Yahoo YUI Compressor
         compressor.setYuiJsLineBreak(-1); //--line-break param for Yahoo YUI Compressor
