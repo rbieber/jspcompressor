@@ -17,9 +17,7 @@ A sample of using the Ant task can be found in the build.xml file:
 
     <target name="test" depends="build.jar">
        <path id="compressor-classpath">
-            <fileset dir="./lib"> 
-                <include name="*.jar"/>
-            </fileset>
+            <pathelement location="${lib.dir}/yuicompressor-2.4.3.jar"/>
             <pathelement location="${build.dir}/htmlcompressor-0.7.3.jar"/>
         </path>    
         <taskdef name="compresshtml" classname="com.googlecode.htmlcompressor.ant.task.CompressHtmlTask" classpathref="compressor-classpath"/>
@@ -58,7 +56,7 @@ Currently the attributes exposed for the task are:
 +-----------------------------------------------------------------------------------------------------+
 
 The last element is apparently a work around that some code uses to initialize struts <html:form> elements
-without actually using them to that was used in Struts 1.0 applications.   For some applications, removal
+without actually using them that was used in Struts 1.0 applications.   For some applications, removal
 of these comments cause forms not to initialize properly.
 
 Finally, the task takes one or more filesets that specify the files to work on.  These are your standard 
@@ -70,7 +68,7 @@ Some java applications render javascript based on the state of the Java applicat
 JSP blocks included in them.   These cause the YUI compressor to fail due to invalid syntax in Javascript.  Remember, 
 YUI actually parses the javascript - so it has to be syntactically correct.   
 
-If you have syntactically incorrect Javascript, the YUICompressor parser will fail.
+If you have syntactically incorrect Javascript, the YUICompressor parser will fail and the failing code will be used uncompressed.
 
 
 
