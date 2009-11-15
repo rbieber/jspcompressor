@@ -36,6 +36,7 @@ public class CompressHtmlTask extends Task {
     private boolean compressJS = false;
     private boolean compressCSS = true;
     private boolean skipStrutsFormTagComments = false;
+    private boolean debugMode = false;
     
     /**
      * Main execution function of the Ant Task.
@@ -116,6 +117,7 @@ public class CompressHtmlTask extends Task {
         compressor.setYuiJsLineBreak(-1); //--line-break param for Yahoo YUI Compressor
         compressor.setYuiJsNoMunge(false); //--nomunge param for Yahoo YUI Compressor
         compressor.setYuiJsPreserveAllSemiColons(true);//--preserve-semi param for Yahoo YUI Compressor
+        compressor.setDebugMode(debugMode);
         
         // custom attribute to skip comments with Struts html:form TagElement
         compressor.setSkipStrutsFormComments(skipStrutsFormTagComments);
@@ -279,5 +281,9 @@ public class CompressHtmlTask extends Task {
      */    
     public void setSkipStrutsFormComments(boolean skipFormComments) {
        skipStrutsFormTagComments = skipFormComments;
+    }
+    
+    public void setDebug(boolean debug) {
+       this.debugMode = debug;
     }
 }

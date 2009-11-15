@@ -110,8 +110,8 @@
             <pathelement location="${build.dir}/htmlcompressor-0.7.3.jar"/>
         </path>    
         <taskdef name="compresshtml" classname="com.googlecode.htmlcompressor.ant.task.CompressHtmlTask" classpathref="compressor-classpath"/>
-        <compresshtml destdir="./tmp" compressjs="true" removecomments="true" removejspcomments="true" skipstrutsformcomments="true">
-            <fileset dir="testsrc" includes="**/*.jsp"/>
+        <compresshtml destdir="./tmp" compressjs="true" removecomments="true" removejspcomments="true" debug="false" skipstrutsformcomments="true">
+            <fileset dir="testsrc" includes="**/browserCheckTile.jsp"/>
         </compresshtml>
     </target>    
 
