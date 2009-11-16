@@ -40,6 +40,10 @@
             <fileset dir="${build.dir}/classes" includes="**/*.class"/>
         </copy>
         <jar destfile="${build.dir}/${jar.name}" basedir="${build.dir}/jar">
+			<manifest>
+				<attribute name="Main-Class" value="com.googlecode.htmlcompressor.CmdLineCompressor"/>
+				<attribute name="Class-Path" value="yuicompressor-2.4.3.jar"/>
+			</manifest>
         </jar>
     </target>
 	
@@ -107,7 +111,7 @@
     <target name="test" depends="build.jar">
        <path id="compressor-classpath">
             <pathelement location="${lib.dir}/yuicompressor-2.4.3.jar"/>
-            <pathelement location="${build.dir}/htmlcompressor-0.7.3.jar"/>
+            <pathelement location="${build.dir}/htmlcompressor-0.8.1.jar"/>
         </path>    
         <taskdef name="compresshtml" classname="com.googlecode.htmlcompressor.ant.task.CompressHtmlTask" classpathref="compressor-classpath"/>
         <compresshtml destdir="./tmp" compressjs="true" removecomments="true" removejspcomments="true" debug="false" skipstrutsformcomments="true">

@@ -269,7 +269,7 @@ public class HtmlCompressor implements Compressor {
         return html;
     }
     
-    private String processHtml(String html) throws Exception {
+    private String processHtml(String html)  {
         // remove comments and JSP comments, if specified.
         if(this.removeComments) {
             if (skipCommentsWithStrutsForm) {
