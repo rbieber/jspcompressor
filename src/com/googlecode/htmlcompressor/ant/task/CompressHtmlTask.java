@@ -37,6 +37,7 @@ public class CompressHtmlTask extends Task {
     private boolean compressCSS = true;
     private boolean skipStrutsFormTagComments = false;
     private boolean debugMode = false;
+    private boolean enabled = true;
     
     /**
      * Main execution function of the Ant Task.
@@ -104,7 +105,7 @@ public class CompressHtmlTask extends Task {
         HtmlCompressor compressor = new HtmlCompressor();
         String newHTML = null;
     
-        compressor.setEnabled(true); //if false all compression is off (default is true)
+        compressor.setEnabled(enabled); //if false all compression is off (default is true)
         compressor.setRemoveJspComments(removeJspComments);
         compressor.setRemoveComments(removeComments); //if false keeps HTML comments (default is true)
         compressor.setRemoveMultiSpaces(true); //if false keeps multiple whitespace characters (default is true)
@@ -285,5 +286,9 @@ public class CompressHtmlTask extends Task {
     
     public void setDebug(boolean debug) {
        this.debugMode = debug;
+    }
+    
+    public void setEnabled(boolean enabled) {
+       this.enabled = enabled;
     }
 }
