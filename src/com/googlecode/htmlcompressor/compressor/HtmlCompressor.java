@@ -65,12 +65,13 @@ public class HtmlCompressor implements Compressor {
     private static final String tempStyleBlock = "%%%COMPRESS~STYLE~#%%%";
     private static final String tempJSPBlock = "%%%COMPRESS~JSP~#%%%";
     private static final String tempJSPAssignBlock = "%%%COMPRESS~JSPASSIGN~#%%%";
+    private static final String tempStrutsFormCommentBlock = "%%%COMPRESS~STRUTSFORMCOMMENT~#%%%";
     
     //compiled regex patterns
     // The commentStrutsFormHack pattern purposely excludes any comment with <html:form> in it due to a work around
     // for a struts 1.0 bug that we use. 
     private static final Pattern commentMarkersInScript = Pattern.compile("(<!--)|(\\/\\/-->)", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
-    private static final Pattern commentStrutsFormHackPattern = Pattern.compile("<!--[^\\[](?!.*?html:form.*?).*?-->", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
+    private static final Pattern commentStrutsFormCommentPattern = Pattern.compile("<!--[^\\[].*?html:form[^>]*?>.*?-->", Pattern.CASE_INSENSITIVE);
     private static final Pattern commentPattern = Pattern.compile("<!--[^\\[].*?-->", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
     private static final Pattern jspCommentPattern = Pattern.compile("<%--.+?--%>", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
     private static final Pattern intertagPattern = Pattern.compile(">[ \\t\\n\\r]+?<", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
@@ -96,6 +97,7 @@ public class HtmlCompressor implements Compressor {
     private static final Pattern tempStylePattern = Pattern.compile("%%%COMPRESS~STYLE~(\\d+?)%%%", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
     private static final Pattern tempJSPPattern = Pattern.compile("%%%COMPRESS~JSP~(\\d+?)%%%", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
     private static final Pattern tempJSPAssignPattern = Pattern.compile("%%%COMPRESS~JSPASSIGN~(\\d+?)%%%", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
+    private static final Pattern tempStrutsFormCommentPattern = Pattern.compile("%%%COMPRESS~STRUTSFORMCOMMENT~(\\d+?)%%%", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
 
     
     /**
@@ -117,10 +119,17 @@ public class HtmlCompressor implements Compressor {
         List<String> styleBlocks = new ArrayList<String>();
         List<String> jspBlocks = new ArrayList<String>();
         List<String> jspAssignBlocks = new ArrayList<String>();
+        List<String> strutsFormCommentBlocks = new ArrayList<String>();
         
         //preserve blocks
-        html = preserveBlocks(html, preBlocks, taBlocks, scriptBlocks, styleBlocks, jspBlocks, jspAssignBlocks);
-        
+        html = preserveBlocks(html, preBlocks, taBlocks, scriptBlocks, styleBlocks, jspBlocks, jspAssignBlocks, strutsFormCommentBlocks);
+
+        if (debugMode) {        
+            for(int i = 0; i < strutsFormCommentBlocks.size(); i++) {
+                System.out.println("***********\n" + strutsFormCommentBlocks.get(i) + "\n====================\n");
+            }
+        }
+
         //process pure html
         html = processHtml(html);
 
@@ -130,7 +139,7 @@ public class HtmlCompressor implements Compressor {
         processJSPBlocks(jspBlocks);
         
         //put blocks back
-        html = returnBlocks(html, preBlocks, taBlocks, scriptBlocks, styleBlocks, jspBlocks, jspAssignBlocks);
+        html = returnBlocks(html, preBlocks, taBlocks, scriptBlocks, styleBlocks, jspBlocks, jspAssignBlocks, strutsFormCommentBlocks);
         
         return html.trim();
     }
@@ -166,7 +175,8 @@ public class HtmlCompressor implements Compressor {
         return(sb.toString());
     }
     
-    private String preserveBlocks(String html, List<String> preBlocks, List<String> taBlocks, List<String> scriptBlocks, List<String> styleBlocks, List<String>jspBlocks, List<String>jspAssignBlocks) {
+    private String preserveBlocks(String html, List<String> preBlocks, List<String> taBlocks, List<String> scriptBlocks, 
+                                  List<String> styleBlocks, List<String>jspBlocks, List<String>jspAssignBlocks, List<String> strutsFormCommentBlocks) {
         // preserve JSP variable references
         html = preserveBlocks(html, jspAssignPattern, tempJSPAssignBlock, jspAssignBlocks);
         html = preserveBlocks(html, jspPattern, tempJSPBlock, jspBlocks);
@@ -174,17 +184,23 @@ public class HtmlCompressor implements Compressor {
         html = preserveBlocks(html, scriptPattern, tempScriptBlock, scriptBlocks);        
         html = preserveBlocks(html, stylePattern, tempStyleBlock, styleBlocks);
         html = preserveBlocks(html, taPattern, tempTextAreaBlock, taBlocks);          
+        if (skipCommentsWithStrutsForm) {
+            html = preserveBlocks(html, commentStrutsFormCommentPattern, tempStrutsFormCommentBlock, strutsFormCommentBlocks);
+        }          
     
         return(html);
     }
     
-    private String returnBlocks(String html, List<String> preBlocks, List<String> taBlocks, List<String> scriptBlocks, List<String> styleBlocks, List<String> jspBlocks, List<String> jspAssignBlocks) {
+    private String returnBlocks(String html, List<String> preBlocks, List<String> taBlocks, List<String> scriptBlocks, List<String> styleBlocks, 
+                                List<String> jspBlocks, List<String> jspAssignBlocks, List<String> strutsFormCommentBlocks) {
+        html = returnBlocks(html, tempStrutsFormCommentPattern, strutsFormCommentBlocks); 
         html = returnBlocks(html, tempTextAreaPattern, taBlocks);
         html = returnBlocks(html, tempStylePattern, styleBlocks);
         html = returnBlocks(html, tempScriptPattern, scriptBlocks);
         html = returnBlocks(html, tempPrePattern, preBlocks);
         html = returnBlocks(html, tempJSPPattern, jspBlocks);      
         html = returnBlocks(html, tempJSPAssignPattern, jspAssignBlocks);  
+         
         
         //remove inter-tag spaces
         if(removeIntertagSpaces) {
@@ -196,12 +212,15 @@ public class HtmlCompressor implements Compressor {
     
     private String processHtml(String html)  {
         // remove comments and JSP comments, if specified.
+        Matcher p = null;
         if(this.removeComments) {
-            if (skipCommentsWithStrutsForm) {
-                html = commentStrutsFormHackPattern.matcher(html).replaceAll("");
-            } else {
-                html = commentPattern.matcher(html).replaceAll("");
+            if (debugMode) {
+                p = commentPattern.matcher(html);
+                while (p.find()) {
+                    System.out.println("COMMENT:" + p.group(0));
+                }
             }
+            html = commentPattern.matcher(html).replaceAll("");
         }
         
         if (this.removeJspComments) {
