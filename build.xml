@@ -115,7 +115,7 @@
         </path>    
         <taskdef name="compresshtml" classname="com.googlecode.htmlcompressor.ant.task.CompressHtmlTask" classpathref="compressor-classpath"/>
         <compresshtml destdir="./tmp" compressjs="true" removecomments="true" removejspcomments="true" debug="false" skipstrutsformcomments="true">
-            <fileset dir="testsrc" includes="**/*.jsp"/>
+            <fileset dir="testsrc" includes="**/meta.jsp"/>
         </compresshtml>
     </target>    
 

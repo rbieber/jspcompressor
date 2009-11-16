@@ -73,7 +73,7 @@ public class HtmlCompressor implements Compressor {
     private static final Pattern commentStrutsFormHackPattern = Pattern.compile("<!--[^\\[](?!.*?html:form.*?).*?-->", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
     private static final Pattern commentPattern = Pattern.compile("<!--[^\\[].*?-->", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
     private static final Pattern jspCommentPattern = Pattern.compile("<%--.+?--%>", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
-    private static final Pattern intertagPattern = Pattern.compile(">\\s+?<", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
+    private static final Pattern intertagPattern = Pattern.compile(">(\\s|\\n)+?<", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
     private static final Pattern multispacePattern = Pattern.compile("\\s{2,}", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
     private static final Pattern prePattern = Pattern.compile("<pre[^>]*?>.*?</pre>", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
     private static final Pattern taPattern = Pattern.compile("<textarea[^>]*?>.*?</textarea>", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
@@ -173,7 +173,7 @@ public class HtmlCompressor implements Compressor {
         html = preserveBlocks(html, stylePattern, tempStyleBlock, styleBlocks);
         html = preserveBlocks(html, taPattern, tempTextAreaBlock, taBlocks);          
 
-        return html;
+        return(html);
     }
     
     private String returnBlocks(String html, List<String> preBlocks, List<String> taBlocks, List<String> scriptBlocks, List<String> styleBlocks, List<String> jspBlocks, List<String> jspAssignBlocks) {
@@ -183,6 +183,11 @@ public class HtmlCompressor implements Compressor {
         html = returnBlocks(html, tempPrePattern, preBlocks);
         html = returnBlocks(html, tempJSPPattern, jspBlocks);      
         html = returnBlocks(html, tempJSPAssignPattern, jspAssignBlocks);  
+        
+        //remove inter-tag spaces
+        if(removeIntertagSpaces) {
+            html = intertagPattern.matcher(html).replaceAll("><");
+        }
 
         return(html);
     }
@@ -227,7 +232,7 @@ public class HtmlCompressor implements Compressor {
             // Remove any JSP comments that might be in the javascript for security reasons
             // (developer only comments, etc)
             scriptBlock = jspCommentPattern.matcher(scriptBlock).replaceAll("");
-
+            
             if (!compressJavaScript) {
                 scriptBlock = jsLeadingSpacePattern.matcher(scriptBlock).replaceAll("");
                 scriptBlock = jsTrailingSpacePattern.matcher(scriptBlock).replaceAll("");
@@ -266,6 +271,7 @@ public class HtmlCompressor implements Compressor {
                 
                 JavaScriptCompressor compressor = new JavaScriptCompressor(new StringReader(scriptMatcher.group(1)), null);
                 compressor.compress(result, yuiJsLineBreak, !yuiJsNoMunge, false, yuiJsPreserveAllSemiColons, yuiJsDisableOptimizations);
+                
             } catch (Exception e) {
                 if (debugMode) {
                     System.out.println(e.getMessage() + "\nIn Javascript block:\n" + scriptMatcher.group(1));
@@ -278,7 +284,8 @@ public class HtmlCompressor implements Compressor {
 
             if (debugMode) {              
                 System.out.println(source.substring(0, scriptMatcher.start(1)) + result.toString() + source.substring(scriptMatcher.end(1)));  
-            }      
+            }    
+              
             return (new StringBuilder(source.substring(0, scriptMatcher.start(1))).append(result.toString()).append(source.substring(scriptMatcher.end(1)))).toString();
         
         } else {
@@ -639,7 +646,12 @@ public class HtmlCompressor implements Compressor {
     public void setSkipStrutsFormComments(boolean leaveComments) {
        skipCommentsWithStrutsForm = leaveComments;
     }
-    
+
+    /**
+     * If set to <code>true</code> the compressor will display debug messages as it works.
+     *
+     * @return Nothing
+     */     
     public void setDebugMode(boolean debugMode) {
         this.debugMode = debugMode;
     }
