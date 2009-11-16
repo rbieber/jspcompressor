@@ -117,6 +117,7 @@ public class HtmlCompressor implements Compressor {
         List<String> styleBlocks = new ArrayList<String>();
         List<String> jspBlocks = new ArrayList<String>();
         List<String> jspAssignBlocks = new ArrayList<String>();
+        
         //preserve blocks
         html = preserveBlocks(html, preBlocks, taBlocks, scriptBlocks, styleBlocks, jspBlocks, jspAssignBlocks);
         
@@ -133,140 +134,57 @@ public class HtmlCompressor implements Compressor {
         return html.trim();
     }
 
+    private String preserveBlocks(String html, Pattern thePattern, String tempBlock, List<String> theBlocks) {
+        Matcher matcher = null;
+        StringBuffer sb = null;
+        int index = 0;
+        
+        matcher = thePattern.matcher(html);
+        index = 0;
+        sb = new StringBuffer();
+        while(matcher.find()) {
+            theBlocks.add(matcher.group(0));
+            matcher.appendReplacement(sb, tempBlock.replaceFirst("#", Integer.toString(index++)));
+        }
+        
+        matcher.appendTail(sb);
+
+        return(sb.toString());
+    }
+    
+    private String returnBlocks(String html, Pattern thePattern, List<String> theBlocks) {
+        Matcher matcher = thePattern.matcher(html);
+        StringBuffer sb = new StringBuffer();
+        
+        while(matcher.find()) {
+            matcher.appendReplacement(sb, Matcher.quoteReplacement(theBlocks.get(Integer.parseInt(matcher.group(1)))));
+        }
+
+        matcher.appendTail(sb);
+        return(sb.toString());
+    }
     
     private String preserveBlocks(String html, List<String> preBlocks, List<String> taBlocks, List<String> scriptBlocks, List<String> styleBlocks, List<String>jspBlocks, List<String>jspAssignBlocks) {
-        Matcher matcher = null;
-        int index;
-        StringBuffer sb = null;
-
-        //preserve JSP variable reference tags
-        matcher = jspAssignPattern.matcher(html);
-        index = 0;
-        sb = new StringBuffer();
-        while(matcher.find()) {
-            jspAssignBlocks.add(matcher.group(0));
-            matcher.appendReplacement(sb, tempJSPAssignBlock.replaceFirst("#", Integer.toString(index++)));
-        }
-        
-        matcher.appendTail(sb);
-        html = sb.toString();
-        
-        //preserve JSP tags
-        matcher = jspPattern.matcher(html);
-        index = 0;
-        sb = new StringBuffer();
-        while(matcher.find()) {
-            jspBlocks.add(matcher.group(0));
-            matcher.appendReplacement(sb, tempJSPBlock.replaceFirst("#", Integer.toString(index++)));
-        }
-        
-        matcher.appendTail(sb);
-        html = sb.toString();
-        
-        //preserve PRE tags
-        matcher = prePattern.matcher(html);
-        
-        index = 0;
-        sb = new StringBuffer();
-        while(matcher.find()) {
-            preBlocks.add(matcher.group(0));
-            matcher.appendReplacement(sb, tempPreBlock.replaceFirst("#", Integer.toString(index++)));
-        }
-        matcher.appendTail(sb);
-        html = sb.toString();
-        
-        //preserve SCRIPT tags
-        matcher = scriptPattern.matcher(html);
-        index = 0;
-        sb = new StringBuffer();
-        while(matcher.find()) {
-            scriptBlocks.add(matcher.group(0));
-            matcher.appendReplacement(sb, tempScriptBlock.replaceFirst("#", Integer.toString(index++)));
-        }
-        
-        matcher.appendTail(sb);
-        html = sb.toString();
-
-        //preserve STYLE tags
-        matcher = stylePattern.matcher(html);
-        index = 0;
-        sb = new StringBuffer();
-        while(matcher.find()) {
-            styleBlocks.add(matcher.group(0));
-            matcher.appendReplacement(sb, tempStyleBlock.replaceFirst("#", Integer.toString(index++)));
-        }
-        matcher.appendTail(sb);
-        html = sb.toString();
-        
-        //preserve TEXTAREA tags
-        matcher = taPattern.matcher(html);
-        index = 0;
-        sb = new StringBuffer();
-        while(matcher.find()) {
-            taBlocks.add(matcher.group(0));
-            matcher.appendReplacement(sb, tempTextAreaBlock.replaceFirst("#", Integer.toString(index++)));
-        }
-        matcher.appendTail(sb);
-        html = sb.toString();
+        // preserve JSP variable references
+        html = preserveBlocks(html, jspAssignPattern, tempJSPAssignBlock, jspAssignBlocks);
+        html = preserveBlocks(html, jspPattern, tempJSPBlock, jspBlocks);
+        html = preserveBlocks(html, prePattern, tempPreBlock, preBlocks);
+        html = preserveBlocks(html, scriptPattern, tempScriptBlock, scriptBlocks);        
+        html = preserveBlocks(html, stylePattern, tempStyleBlock, styleBlocks);
+        html = preserveBlocks(html, taPattern, tempTextAreaBlock, taBlocks);          
 
         return html;
     }
     
     private String returnBlocks(String html, List<String> preBlocks, List<String> taBlocks, List<String> scriptBlocks, List<String> styleBlocks, List<String> jspBlocks, List<String> jspAssignBlocks) {
-        //put TEXTAREA blocks back
-        Matcher matcher = tempTextAreaPattern.matcher(html);
-        StringBuffer sb = new StringBuffer();
-        while(matcher.find()) {
-            matcher.appendReplacement(sb, Matcher.quoteReplacement(taBlocks.get(Integer.parseInt(matcher.group(1)))));
-        }
-        matcher.appendTail(sb);
-        html = sb.toString();
-        
-        //put STYLE blocks back
-        matcher = tempStylePattern.matcher(html);
-        sb = new StringBuffer();
-        while(matcher.find()) {
-            matcher.appendReplacement(sb, Matcher.quoteReplacement(styleBlocks.get(Integer.parseInt(matcher.group(1)))));
-        }
-        matcher.appendTail(sb);
-        html = sb.toString();
-        
-        //put SCRIPT blocks back
-        matcher = tempScriptPattern.matcher(html);
-        sb = new StringBuffer();
-        while(matcher.find()) {
-            matcher.appendReplacement(sb, Matcher.quoteReplacement(scriptBlocks.get(Integer.parseInt(matcher.group(1)))));
-        }
-        matcher.appendTail(sb);
-        html = sb.toString();
+        html = returnBlocks(html, tempTextAreaPattern, taBlocks);
+        html = returnBlocks(html, tempStylePattern, styleBlocks);
+        html = returnBlocks(html, tempScriptPattern, scriptBlocks);
+        html = returnBlocks(html, tempPrePattern, preBlocks);
+        html = returnBlocks(html, tempJSPPattern, jspBlocks);      
+        html = returnBlocks(html, tempJSPAssignPattern, jspAssignBlocks);  
 
-        //put PRE blocks back
-        matcher = tempPrePattern.matcher(html);
-        sb = new StringBuffer();
-        while(matcher.find()) {
-            matcher.appendReplacement(sb, Matcher.quoteReplacement(preBlocks.get(Integer.parseInt(matcher.group(1)))));
-        }
-        matcher.appendTail(sb);
-        html = sb.toString();
-        
-        //put JSP blocks back
-        matcher = tempJSPPattern.matcher(html);
-        sb = new StringBuffer();
-        while(matcher.find()) {
-            matcher.appendReplacement(sb, Matcher.quoteReplacement(jspBlocks.get(Integer.parseInt(matcher.group(1)))));
-        }
-        matcher.appendTail(sb);
-        html = sb.toString();
-        
-        //put variable reference blocks back
-        matcher = tempJSPAssignPattern.matcher(html);
-        sb = new StringBuffer();
-        while(matcher.find()) {
-            matcher.appendReplacement(sb, Matcher.quoteReplacement(jspAssignBlocks.get(Integer.parseInt(matcher.group(1)))));
-        }
-        matcher.appendTail(sb);
-        html = sb.toString();
-        return html;
+        return(html);
     }
     
     private String processHtml(String html)  {
