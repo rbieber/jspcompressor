@@ -173,6 +173,8 @@ public class HtmlCompressor implements Compressor {
         html = preserveBlocks(html, stylePattern, tempStyleBlock, styleBlocks);
         html = preserveBlocks(html, taPattern, tempTextAreaBlock, taBlocks);          
 
+        processJSPBlocks(jspBlocks);
+        
         return(html);
     }
     
@@ -244,7 +246,22 @@ public class HtmlCompressor implements Compressor {
             scriptBlocks.set(i, scriptBlock);
         }
     }
-    
+
+    private void processJSPBlocks(List<String> theBlocks) {
+
+        for(int i = 0; i < theBlocks.size(); i++) {
+            String theBlock = theBlocks.get(i);
+            
+            // Remove any JSP comments that might be in the javascript for security reasons
+            // (developer only comments, etc)
+            theBlock = jspCommentPattern.matcher(theBlock).replaceAll("");
+            theBlock = jsLeadingSpacePattern.matcher(theBlock).replaceAll("");
+            theBlock = jsTrailingSpacePattern.matcher(theBlock).replaceAll("");
+            theBlock = jsEmptyLinePattern.matcher(theBlock).replaceAll("");
+            theBlocks.set(i, theBlock);
+        }
+    }
+        
     private void processStyleBlocks(List<String> styleBlocks) throws Exception {
         if(compressCss) {
             for(int i = 0; i < styleBlocks.size(); i++) {
