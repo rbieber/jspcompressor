@@ -18,7 +18,7 @@ A sample of using the Ant task can be found in the build.xml file:
     <target name="test" depends="build.jar">
        <path id="compressor-classpath">
             <pathelement location="${lib.dir}/yuicompressor-2.4.3.jar"/>
-            <pathelement location="${build.dir}/htmlcompressor-0.7.3.jar"/>
+            <pathelement location="${build.dir}/htmlcompressor-0.8.1.jar"/>
         </path>    
         <taskdef name="compresshtml" classname="com.googlecode.htmlcompressor.ant.task.CompressHtmlTask" classpathref="compressor-classpath"/>
         <compresshtml destdir="./tmp" compressjs="true" removecomments="true" removejspcomments="true" skipstrutsformcomments="true">
@@ -70,5 +70,9 @@ YUI actually parses the javascript - so it has to be syntactically correct.
 
 If you have syntactically incorrect Javascript, the YUICompressor parser will fail and the failing code will be used uncompressed.
 
+If you are receving "string index out of bounds" errors while trying to compress javascript, ensure that you do not have a version
+of Rhino in your CLASSPATH.   While the YUI compressor docs say that it can run side by side with other versions of Rhino, in my
+experience this isn't the case.  YUI compressor includes its own version of Rhino within the jar file and these conflict.
 
+Once I removed Rhino from my CLASSPATH, my errors went away.
 
