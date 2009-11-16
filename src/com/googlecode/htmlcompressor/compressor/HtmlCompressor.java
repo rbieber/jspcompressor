@@ -73,7 +73,7 @@ public class HtmlCompressor implements Compressor {
     private static final Pattern commentStrutsFormHackPattern = Pattern.compile("<!--[^\\[](?!.*?html:form.*?).*?-->", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
     private static final Pattern commentPattern = Pattern.compile("<!--[^\\[].*?-->", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
     private static final Pattern jspCommentPattern = Pattern.compile("<%--.+?--%>", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
-    private static final Pattern intertagPattern = Pattern.compile(">(\\s|\\n)+?<", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
+    private static final Pattern intertagPattern = Pattern.compile(">[ \\t\\n\\r]+?<", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
     private static final Pattern multispacePattern = Pattern.compile("\\s{2,}", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
     private static final Pattern prePattern = Pattern.compile("<pre[^>]*?>.*?</pre>", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
     private static final Pattern taPattern = Pattern.compile("<textarea[^>]*?>.*?</textarea>", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
@@ -127,6 +127,7 @@ public class HtmlCompressor implements Compressor {
         //process preserved blocks
         processScriptBlocks(scriptBlocks);
         processStyleBlocks(styleBlocks);
+        processJSPBlocks(jspBlocks);
         
         //put blocks back
         html = returnBlocks(html, preBlocks, taBlocks, scriptBlocks, styleBlocks, jspBlocks, jspAssignBlocks);
@@ -142,6 +143,7 @@ public class HtmlCompressor implements Compressor {
         matcher = thePattern.matcher(html);
         index = 0;
         sb = new StringBuffer();
+        
         while(matcher.find()) {
             theBlocks.add(matcher.group(0));
             matcher.appendReplacement(sb, tempBlock.replaceFirst("#", Integer.toString(index++)));
@@ -172,9 +174,7 @@ public class HtmlCompressor implements Compressor {
         html = preserveBlocks(html, scriptPattern, tempScriptBlock, scriptBlocks);        
         html = preserveBlocks(html, stylePattern, tempStyleBlock, styleBlocks);
         html = preserveBlocks(html, taPattern, tempTextAreaBlock, taBlocks);          
-
-        processJSPBlocks(jspBlocks);
-        
+    
         return(html);
     }
     
