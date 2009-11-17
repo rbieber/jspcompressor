@@ -13,15 +13,16 @@ package com.googlecode.htmlcompressor.ant.task;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- 
-import org.apache.tools.ant.Task;
-import com.googlecode.htmlcompressor.compressor.*;
-import java.io.*;
-import java.util.Vector;
-import java.util.Enumeration;
-import org.apache.tools.ant.types.FileSet;
-import org.apache.tools.ant.DirectoryScanner;
+
+import com.googlecode.htmlcompressor.compressor.HtmlCompressor;
 import org.apache.tools.ant.BuildException;
+import org.apache.tools.ant.DirectoryScanner;
+import org.apache.tools.ant.Task;
+import org.apache.tools.ant.types.FileSet;
+
+import java.io.*;
+import java.util.Enumeration;
+import java.util.Vector;
 
 /**
  * Ant Task that wraps the htmlcompressor library written by Sergiy Kovalchuck
@@ -283,11 +284,20 @@ public class CompressHtmlTask extends Task {
     public void setSkipStrutsFormComments(boolean skipFormComments) {
        skipStrutsFormTagComments = skipFormComments;
     }
-    
+
+    /**
+     * Set debug mode for the module.  This will print diagnostic information as the tool runs.
+     * @param debug  If true, debugmode is set, otherwise it is not.
+     */
     public void setDebug(boolean debug) {
        this.debugMode = debug;
     }
-    
+
+    /**
+     * Enable compression.  True is the default.
+     * @param enabled  If set to false, this module will not do compression of the files, but will just move
+     * them like a copy would.
+     */
     public void setEnabled(boolean enabled) {
        this.enabled = enabled;
     }

@@ -14,15 +14,15 @@ package com.googlecode.htmlcompressor.compressor;
  * limitations under the License.
  */
 
+import com.yahoo.platform.yui.compressor.CssCompressor;
+import com.yahoo.platform.yui.compressor.JavaScriptCompressor;
+
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import com.yahoo.platform.yui.compressor.CssCompressor;
-import com.yahoo.platform.yui.compressor.JavaScriptCompressor;
 
 /**
  * Class that compresses given HTML source by removing comments, extra spaces and 
@@ -183,7 +183,8 @@ public class HtmlCompressor implements Compressor {
         html = preserveBlocks(html, prePattern, tempPreBlock, preBlocks);
         html = preserveBlocks(html, scriptPattern, tempScriptBlock, scriptBlocks);        
         html = preserveBlocks(html, stylePattern, tempStyleBlock, styleBlocks);
-        html = preserveBlocks(html, taPattern, tempTextAreaBlock, taBlocks);          
+        html = preserveBlocks(html, taPattern, tempTextAreaBlock, taBlocks);
+
         if (skipCommentsWithStrutsForm) {
             html = preserveBlocks(html, commentStrutsFormCommentPattern, tempStrutsFormCommentBlock, strutsFormCommentBlocks);
         }          
