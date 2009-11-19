@@ -256,15 +256,20 @@ public class HtmlCompressor implements Compressor {
             scriptBlock = jspCommentPattern.matcher(scriptBlock).replaceAll("");
             
             if (!compressJavaScript) {
-                scriptBlock = jsLeadingSpacePattern.matcher(scriptBlock).replaceAll("");
-                scriptBlock = jsTrailingSpacePattern.matcher(scriptBlock).replaceAll("");
-                scriptBlock = jsEmptyLinePattern.matcher(scriptBlock).replaceAll("");
+                scriptBlock = trimEmptySpace(scriptBlock);
             } else {
                 scriptBlock = compressJavaScript(scriptBlock);
             }
             
             scriptBlocks.set(i, scriptBlock);
         }
+    }
+
+    private String trimEmptySpace(String scriptBlock) {
+        scriptBlock = jsLeadingSpacePattern.matcher(scriptBlock).replaceAll("");
+        scriptBlock = jsTrailingSpacePattern.matcher(scriptBlock).replaceAll("");
+        scriptBlock = jsEmptyLinePattern.matcher(scriptBlock).replaceAll("");
+        return scriptBlock;
     }
 
     private void processJSPBlocks(List<String> theBlocks) {
@@ -275,9 +280,7 @@ public class HtmlCompressor implements Compressor {
             // Remove any JSP comments that might be in the javascript for security reasons
             // (developer only comments, etc)
             theBlock = jspCommentPattern.matcher(theBlock).replaceAll("");
-            theBlock = jsLeadingSpacePattern.matcher(theBlock).replaceAll("");
-            theBlock = jsTrailingSpacePattern.matcher(theBlock).replaceAll("");
-            theBlock = jsEmptyLinePattern.matcher(theBlock).replaceAll("");
+            theBlock = trimEmptySpace(theBlock);
             theBlocks.set(i, theBlock);
         }
     }
@@ -316,7 +319,7 @@ public class HtmlCompressor implements Compressor {
                     throw new Exception(e.getMessage() + "\nIn Javascript block:\n" + scriptMatcher.group(1));
                 }
           
-                return(originalSource);
+                return(trimEmptySpace(originalSource));
             }
 
             if (debugMode) {              
