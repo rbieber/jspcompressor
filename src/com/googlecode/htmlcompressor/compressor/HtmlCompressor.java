@@ -266,10 +266,13 @@ public class HtmlCompressor implements Compressor {
     }
 
     private String trimEmptySpace(String scriptBlock) {
-        scriptBlock = jsLeadingSpacePattern.matcher(scriptBlock).replaceAll("");
-        scriptBlock = jsTrailingSpacePattern.matcher(scriptBlock).replaceAll("");
-        scriptBlock = jsEmptyLinePattern.matcher(scriptBlock).replaceAll("");
-        return scriptBlock;
+        if (scriptBlock != null && scriptBlock.length() > 0) {
+            scriptBlock = jsLeadingSpacePattern.matcher(scriptBlock).replaceAll("");
+            scriptBlock = jsTrailingSpacePattern.matcher(scriptBlock).replaceAll("");
+            scriptBlock = jsEmptyLinePattern.matcher(scriptBlock).replaceAll("");
+        }
+
+        return(scriptBlock);
     }
 
     private void processJSPBlocks(List<String> theBlocks) {
