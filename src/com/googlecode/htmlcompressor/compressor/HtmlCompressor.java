@@ -124,12 +124,6 @@ public class HtmlCompressor implements Compressor {
         //preserve blocks
         html = preserveBlocks(html, preBlocks, taBlocks, scriptBlocks, styleBlocks, jspBlocks, jspAssignBlocks, strutsFormCommentBlocks);
 
-        if (debugMode) {        
-            for(int i = 0; i < strutsFormCommentBlocks.size(); i++) {
-                System.out.println("***********\n" + strutsFormCommentBlocks.get(i) + "\n====================\n");
-            }
-        }
-
         //process pure html
         html = processHtml(html);
 
@@ -214,13 +208,8 @@ public class HtmlCompressor implements Compressor {
     private String processHtml(String html)  {
         // remove comments and JSP comments, if specified.
         Matcher p = null;
+
         if(this.removeComments) {
-            if (debugMode) {
-                p = commentPattern.matcher(html);
-                while (p.find()) {
-                    System.out.println("COMMENT:" + p.group(0));
-                }
-            }
             html = commentPattern.matcher(html).replaceAll("");
         }
         
@@ -300,7 +289,8 @@ public class HtmlCompressor implements Compressor {
         StringWriter result = new StringWriter();
         String originalSource = new String(source);
 
-        source = commentMarkersInScript.matcher(source).replaceAll("");                
+        source = commentMarkersInScript.matcher(source).replaceAll("");
+
         //check if block is not empty
         Matcher scriptMatcher = scriptPatternNonEmpty.matcher(source);
  
