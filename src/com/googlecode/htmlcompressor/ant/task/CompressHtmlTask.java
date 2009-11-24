@@ -85,7 +85,10 @@ public class CompressHtmlTask extends Task {
                     if (sourceFileName.compareToIgnoreCase(destFileName) == 0) {
                         throw new BuildException("CompressHTML:  Destination directory is included in source <fileset>, which may overwrite files in your source.");
                     }
-                    
+
+                    if (debugMode) {
+                        System.out.println("Processing file: " + sourceFileName + "\n");
+                    }
                     writeFile(d.toString(), compressHTML(readFile(f.toString(), null)), null);
                     
                 } catch (Exception myException) {
