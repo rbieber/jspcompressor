@@ -277,6 +277,9 @@ public class HtmlCompressor implements Compressor {
             // (developer only comments, etc)
 
             scriptBlock = jspCommentPattern.matcher(scriptBlock).replaceAll("");
+            
+            // yes, HTML comments are sometimes found in Javascript.
+            scriptBlock = commentPattern.matcher(scriptBlock).replaceAll("");
 
             // remove any comment markers you might find in Javascript code (<!-- //-->)
             scriptBlock = commentMarkersInScript.matcher(scriptBlock).replaceAll("");
