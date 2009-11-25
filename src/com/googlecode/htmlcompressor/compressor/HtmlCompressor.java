@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.lang.Math;
 
 /**
  * Class that compresses given HTML source by removing comments, extra spaces and 
@@ -230,7 +231,8 @@ public class HtmlCompressor implements Compressor {
 
         return(html);
     }
-    
+
+
     private String processHtml(String html)  {
         // remove comments and JSP comments, if specified.
 
@@ -291,19 +293,26 @@ public class HtmlCompressor implements Compressor {
             scriptBlock = returnBlocks(scriptBlock, tempJavaScriptJSPPattern, jspBlocks);
 
             // Calculate compresion ratio achieved.
-            compressionRatio = (int) (100.0 - (((double) scriptBlock.length() / (double) originalSourceLength) * 100.0));
-            
+            compressionRatio = compressionRatio(originalSourceLength, scriptBlock.length());
+
             if (debugMode) {
                 System.out.println("Returning " + scriptBlock);
                 System.out.println("\nOriginal Size: " + originalSourceLength + ", reduced to " + scriptBlock.length() + " (" + Integer.toString(compressionRatio) +  "%)");
             } else {
-                //System.out.println(Integer.toString(originalSourceLength) + "|" + Integer.toString(scriptBlock.length()) + "|" +  Integer.toString(compressionRatio));
+                //System.out.println(Integer.toString(originalSourceLength) + "|" + Integer.toString(scriptBlock.length()) + "|" +  Integer.toString(compressionRatio) + "%");
             }
             
             scriptBlocks.set(i, scriptBlock);
             jspBlocks.clear();  // clear jsp blocks collection for the next iteration.
         }
 
+    }
+
+    /*
+     * Calculate compression ratio
+     */
+    private int compressionRatio(int originalSourceLength, int newLength) {
+        return((int) Math.abs(((((double) newLength - (double) originalSourceLength) / (double) originalSourceLength) * 100.00)));
     }
 
     private String trimEmptySpace(String scriptBlock) {
