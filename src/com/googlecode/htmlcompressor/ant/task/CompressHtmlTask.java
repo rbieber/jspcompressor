@@ -39,6 +39,8 @@ public class CompressHtmlTask extends Task {
     private boolean skipStrutsFormTagComments = false;
     private boolean debugMode = false;
     private boolean enabled = true;
+
+    private HtmlCompressor compressor = new HtmlCompressor();
     
     /**
      * Main execution function of the Ant Task.
@@ -95,6 +97,8 @@ public class CompressHtmlTask extends Task {
                     throw new BuildException(myException.getMessage() + " while processing file " + sourceFileName);
                 }
             }
+
+            System.out.println("Total blocks processed: " + compressor.getTotal() + ".   Failed: " + compressor.getFailed());
         }
     }
        
@@ -106,7 +110,6 @@ public class CompressHtmlTask extends Task {
      * @return Compressed html buffer     
      */
     private String compressHTML(String buffer) {
-        HtmlCompressor compressor = new HtmlCompressor();
         String newHTML = null;
     
         compressor.setEnabled(enabled); //if false all compression is off (default is true)
