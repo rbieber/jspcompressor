@@ -85,6 +85,10 @@ public class HtmlCompressor implements Compressor {
     private static final Pattern stylePattern = Pattern.compile("<style[^>]*?>.*?</style>", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
     private static final Pattern scriptPatternNonEmpty = Pattern.compile("<script[^>]*?>(.+?)</script>", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
     private static final Pattern stylePatternNonEmpty = Pattern.compile("<style[^>]*?>(.+?)</style>", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
+    /*
+     * Ok, I know this is retarded, but I am specifically looking for custom tags that are namespaced, which I know we use in our code.
+     * I'm assuming this would be true for all JSP programming, but I'm not sure.
+     */
     private static final Pattern jsTagPattern = Pattern.compile("(<[a-z0-9]+?:[a-z0-9]+?[^>]*?>|</[a-z0-9]+?:[a-z0-9]+?[^>]*?>)", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
    
     // JSP and js block patterns used to strip leading and trailing space, as well as empty lines.
@@ -114,6 +118,7 @@ public class HtmlCompressor implements Compressor {
      * @throws Exception
      */
     public String compress(String html) throws Exception {
+        
         if(!enabled || html == null || html.length() == 0) {
             return html;
         }
@@ -150,7 +155,7 @@ public class HtmlCompressor implements Compressor {
         int index = 0;
         
         matcher = thePattern.matcher(html);
-        index = 0;
+
         sb = new StringBuffer();
         
         while(matcher.find()) {
@@ -175,8 +180,15 @@ public class HtmlCompressor implements Compressor {
         return(sb.toString());
     }
     
-    private String preserveBlocks(String html, List<String> preBlocks, List<String> taBlocks, List<String> scriptBlocks, 
-                                  List<String> styleBlocks, List<String>jspBlocks, List<String>jspAssignBlocks, List<String> strutsFormCommentBlocks) {
+    private String preserveBlocks(String html,
+                                  List<String> preBlocks,
+                                  List<String> taBlocks,
+                                  List<String> scriptBlocks,
+                                  List<String> styleBlocks,
+                                  List<String>jspBlocks,
+                                  List<String>jspAssignBlocks,
+                                  List<String> strutsFormCommentBlocks) {
+        
         // preserve JSP variable references
         html = preserveBlocks(html, scriptPattern, tempScriptBlock, scriptBlocks);
         html = preserveBlocks(html, jspAssignPattern, tempJSPAssignBlock, jspAssignBlocks);
@@ -192,8 +204,15 @@ public class HtmlCompressor implements Compressor {
         return(html);
     }
     
-    private String returnBlocks(String html, List<String> preBlocks, List<String> taBlocks, List<String> scriptBlocks, List<String> styleBlocks, 
-                                List<String> jspBlocks, List<String> jspAssignBlocks, List<String> strutsFormCommentBlocks) {
+    private String returnBlocks(String html,
+                                List<String> preBlocks,
+                                List<String> taBlocks,
+                                List<String> scriptBlocks,
+                                List<String> styleBlocks,
+                                List<String> jspBlocks,
+                                List<String> jspAssignBlocks,
+                                List<String> strutsFormCommentBlocks) {
+
         html = returnBlocks(html, tempStrutsFormCommentPattern, strutsFormCommentBlocks); 
         html = returnBlocks(html, tempTextAreaPattern, taBlocks);
         html = returnBlocks(html, tempStylePattern, styleBlocks);
@@ -214,7 +233,6 @@ public class HtmlCompressor implements Compressor {
     
     private String processHtml(String html)  {
         // remove comments and JSP comments, if specified.
-        Matcher p = null;
 
         if(this.removeComments) {
             html = commentPattern.matcher(html).replaceAll("");
@@ -245,20 +263,22 @@ public class HtmlCompressor implements Compressor {
     private void processScriptBlocks(List<String> scriptBlocks) throws Exception {
         List<String> jspBlocks = new ArrayList<String>();
 
-        int iSourceLength = 0,
+        int originalSourceLength = 0,
             compressionRatio = 0;
 
         for(int i = 0; i < scriptBlocks.size(); i++) {
             String scriptBlock = scriptBlocks.get(i);
 
-            iSourceLength = scriptBlock.length();
+            originalSourceLength = scriptBlock.length();
 
             // Remove any JSP comments that might be in the javascript for security reasons
             // (developer only comments, etc)
+
             scriptBlock = jspCommentPattern.matcher(scriptBlock).replaceAll("");
+
+            // remove any comment markers you might find in Javascript code (<!-- //-->)
             scriptBlock = commentMarkersInScript.matcher(scriptBlock).replaceAll("");
 			            
-            jspBlocks.clear();
             scriptBlock = preserveBlocks(scriptBlock, jspAllPattern, tempJavaScriptBlock, jspBlocks);
 
 
@@ -270,16 +290,18 @@ public class HtmlCompressor implements Compressor {
 
             scriptBlock = returnBlocks(scriptBlock, tempJavaScriptJSPPattern, jspBlocks);
 
-            compressionRatio = (int) (100.0 - (((double) scriptBlock.length() / (double) iSourceLength) * 100.0));
+            // Calculate compresion ratio achieved.
+            compressionRatio = (int) (100.0 - (((double) scriptBlock.length() / (double) originalSourceLength) * 100.0));
             
             if (debugMode) {
                 System.out.println("Returning " + scriptBlock);
-                System.out.println("\nOriginal Size: " + iSourceLength + ", reduced to " + scriptBlock.length() + " (" + Integer.toString(compressionRatio) +  "%)");
+                System.out.println("\nOriginal Size: " + originalSourceLength + ", reduced to " + scriptBlock.length() + " (" + Integer.toString(compressionRatio) +  "%)");
             } else {
-                //System.out.println(Integer.toString(iSourceLength) + "|" + Integer.toString(scriptBlock.length()) + "|" +  Integer.toString(compressionRatio));               
+                //System.out.println(Integer.toString(originalSourceLength) + "|" + Integer.toString(scriptBlock.length()) + "|" +  Integer.toString(compressionRatio));
             }
             
             scriptBlocks.set(i, scriptBlock);
+            jspBlocks.clear();  // clear jsp blocks collection for the next iteration.
         }
 
     }
@@ -349,7 +371,6 @@ public class HtmlCompressor implements Compressor {
             
                 scriptBlock = returnBlocks(result.toString(), tempJSTagPattern, tagBlocks);    
             } catch (Exception e) {
-
                 return(trimEmptySpace(originalSource));
             }
 
@@ -362,11 +383,12 @@ public class HtmlCompressor implements Compressor {
     
     private String compressCssStyles(String source) throws Exception {
         
-        //check if block is not empty
+        // check if block is not empty
         Matcher styleMatcher = stylePatternNonEmpty.matcher(source);
+        
         if(styleMatcher.find()) {
             
-            //call YUICompressor
+            // call YUICompressor
             StringWriter result = new StringWriter();
             CssCompressor compressor = new CssCompressor(new StringReader(styleMatcher.group(1)));
             compressor.compress(result, yuiCssLineBreak);
