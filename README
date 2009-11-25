@@ -21,7 +21,7 @@ A sample of using the Ant task can be found in the build.xml file:
             <pathelement location="${build.dir}/htmlcompressor-0.8.1.jar"/>
         </path>    
         <taskdef name="compresshtml" classname="com.googlecode.htmlcompressor.ant.task.CompressHtmlTask" classpathref="compressor-classpath"/>
-        <compresshtml destdir="./tmp" compressjs="true" removecomments="true" removejspcomments="true" skipstrutsformcomments="true">
+        <compresshtml destdir="./tmp" compressjs="true" removecomments="true" removejspcomments="true" debug="false" skipstrutsformcomments="true">
             <fileset dir="testsrc" includes="**/*.jsp"/>
         </compresshtml>
     </target> 
@@ -49,6 +49,9 @@ Currently the attributes exposed for the task are:
 | removecomments          | true or false   | Tells the compressor to remove html comments            |
 |-----------------------------------------------------------------------------------------------------|
 | removejspcomments       | true or false   | Tells the compressor to remove JSP comments (<%-- --%> )|
+|-----------------------------------------------------------------------------------------------------|
+| debug                   | true or false   | Display debug messages (mostly used for JS Compression  |
+|                         |                 | debugging right now.                                    |
 |-----------------------------------------------------------------------------------------------------|
 | skipstrutsformcomments  | true or false   | Tells the compressor to leave JSP comments (<%-- --%>)  |
 |                         |                 | that contain references to the <html:form> struts       |
