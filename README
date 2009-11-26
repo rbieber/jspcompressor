@@ -85,9 +85,9 @@ Once I removed Rhino from my CLASSPATH, my errors went away.
 
 Final Note
 ----------
-The code for this has dramatically changed from the original.   To minimize confusion, the project and its related classes
-will now be called jspcompressor rather than HTMLCompressor.   While the name has changed and the functionality has been
-enhanced, it should still work on plain ol' html files as well as ASP and JSP files.
+The code for this has dramatically changed from the original.   To minimize confusion, the project and its related 
+classes will now be called jspcompressor rather than HTMLCompressor.   While the name has changed and the 
+functionality has been enhanced, it should still work on plain ol' html files as well as ASP and JSP files.
 
 I have also not kept the velocity tags and custom tag up to date, as this didn't necessarily map to the problem space I
 am dealing with (yet).   I welcome contributions to bring these up to date.
