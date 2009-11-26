@@ -39,6 +39,7 @@ public class CompressHtmlTask extends Task {
     private boolean skipStrutsFormTagComments = false;
     private boolean debugMode = false;
     private boolean enabled = true;
+    private boolean failOnError = false;
 
     private HtmlCompressor compressor = new HtmlCompressor();
     
@@ -126,6 +127,7 @@ public class CompressHtmlTask extends Task {
         compressor.setYuiJsNoMunge(false); //--nomunge param for Yahoo YUI Compressor
         compressor.setYuiJsPreserveAllSemiColons(true);//--preserve-semi param for Yahoo YUI Compressor
         compressor.setDebugMode(debugMode);
+        compressor.setFailOnError(failOnError);
         
         // custom attribute to skip comments with Struts html:form TagElement
         compressor.setSkipStrutsFormComments(skipStrutsFormTagComments);
@@ -306,5 +308,9 @@ public class CompressHtmlTask extends Task {
      */
     public void setEnabled(boolean enabled) {
        this.enabled = enabled;
+    }
+
+    public void setFailOnError(boolean enabled) {
+        this.failOnError = enabled;
     }
 }

@@ -53,6 +53,9 @@ Currently the attributes exposed for the task are:
 | debug                   | true or false   | Display debug messages (mostly used for JS Compression  |
 |                         |                 | debugging right now.                                    |
 |-----------------------------------------------------------------------------------------------------|
+| failonerror             | true or false   | Throws an exception to stop the build if Javascript     |
+|                         |                 | compression fails, with failing code as the message     |
+|-----------------------------------------------------------------------------------------------------|
 | skipstrutsformcomments  | true or false   | Tells the compressor to leave JSP comments (<%-- --%>)  |
 |                         |                 | that contain references to the <html:form> struts       |
 |                         |                 | element                                                 |

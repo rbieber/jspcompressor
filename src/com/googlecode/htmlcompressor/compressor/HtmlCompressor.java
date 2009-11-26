@@ -55,6 +55,7 @@ public class HtmlCompressor implements Compressor {
     private boolean compressJavaScript = false;
     private boolean compressCss = false;
     private boolean debugMode = false;
+    private boolean failOnError = false;
     
     //YUICompressor settings
     private boolean yuiJsNoMunge = false;
@@ -388,7 +389,11 @@ public class HtmlCompressor implements Compressor {
                 scriptBlock = returnBlocks(result.toString(), tempJSTagPattern, tagBlocks);    
             } catch (Exception e) {
                 failed++;
-//                throw new Exception("Returning " + scriptBlock);
+                
+                if (failOnError) {
+                    throw new Exception("Returning " + scriptBlock);
+                }
+
                 return(trimEmptySpace(originalSource));
             }
 
@@ -769,12 +774,35 @@ public class HtmlCompressor implements Compressor {
         this.debugMode = debugMode;
     }
 
+    /**
+     * Get number of failed blocks of this run.
+     * @return  Number of blocks that have failed Javascript compression
+     */
     public int getFailed() {
             return(failed);
     }
 
+    /**
+     * Get total number of javascript blocks processed during this run.
+     * @return  Total number of blocks processed on this run.
+     */
     public int getTotal() {
         return(total);
+    }
+    
+    /**
+     * Set property causing failure on error parsing Javascript.  This will throw an exception with the
+     * offending code as the message, which will stop the build and show the user what block of code was
+     * being processed when the failure occured.
+     *
+     * If this setting is false, all extraneous spaces will be removed from the script block and it will
+     * be returned from the compressor - so you'll still get compression, just not the full advantage
+     * of the YUI compressor.
+     *
+     * @return  Nothing
+     */
+    public void setFailOnError(boolean failonerror) {
+        this.failOnError = failonerror;
     }
     
 }
