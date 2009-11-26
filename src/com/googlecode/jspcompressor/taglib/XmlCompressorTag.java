@@ -1,4 +1,4 @@
-package com.googlecode.htmlcompressor.taglib;
+package com.googlecode.jspcompressor.taglib;
 
 /*
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,7 +20,7 @@ import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.tagext.BodyContent;
 import javax.servlet.jsp.tagext.BodyTagSupport;
 
-import com.googlecode.htmlcompressor.compressor.XmlCompressor;
+import com.googlecode.jspcompressor.compressor.XmlCompressor;
 
 /**
  * JSP tag that compresses an XML content within &lt;compress:xml>.

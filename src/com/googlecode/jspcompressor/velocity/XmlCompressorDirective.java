@@ -1,4 +1,4 @@
-package com.googlecode.htmlcompressor.velocity;
+package com.googlecode.jspcompressor.velocity;
 
 /*
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,7 +15,6 @@ package com.googlecode.htmlcompressor.velocity;
  */
 
 import java.io.IOException;
-import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.Writer;
 
@@ -29,29 +28,24 @@ import org.apache.velocity.runtime.directive.Directive;
 import org.apache.velocity.runtime.log.Log;
 import org.apache.velocity.runtime.parser.node.Node;
 
-import com.googlecode.htmlcompressor.compressor.HtmlCompressor;
-import com.yahoo.platform.yui.compressor.CssCompressor;
+import com.googlecode.jspcompressor.compressor.XmlCompressor;
 
 /**
- * Velocity directive that compresses an CSS content within #compressCss ... #end block.
- * All CSS-related properties from {@link HtmlCompressor} are supported.
+ * Velocity directive that compresses an XML content within #compressXml ... #end block.
+ * Compression parameters are set by default.
  * 
- * @see HtmlCompressor
- * @see <a href="http://developer.yahoo.com/yui/compressor/">Yahoo YUI Compressor</a>
+ * @see XmlCompressor
  * 
  * @author <a href="mailto:serg472@gmail.com">Sergiy Kovalchuk</a>
  */
-public class CssCompressorDirective extends Directive {
+public class XmlCompressorDirective extends Directive {
+	
+	private static final XmlCompressor xmlCompressor = new XmlCompressor();
 	
 	private Log log;
-	
-	private boolean enabled = true;
-	
-	//YUICompressor settings
-	private int yuiCssLineBreak = -1;
 
 	public String getName() {
-		return "compressCss";
+		return "compressXml";
 	}
 
 	public int getType() {
@@ -64,8 +58,9 @@ public class CssCompressorDirective extends Directive {
 		log = rs.getLog();
 		
 		//set compressor properties
-		enabled = rs.getBoolean("userdirective.compressCss.enabled", true);
-		yuiCssLineBreak = rs.getInt("userdirective.compressCss.yuiCssLineBreak", -1);
+		xmlCompressor.setEnabled(rs.getBoolean("userdirective.compressXml.enabled", true));
+		xmlCompressor.setRemoveComments(rs.getBoolean("userdirective.compressXml.removeComments", true));
+		xmlCompressor.setRemoveIntertagSpaces(rs.getBoolean("userdirective.compressXml.removeIntertagSpaces", true));
 	}
 
     public boolean render(InternalContextAdapter context, Writer writer, Node node) 
@@ -76,23 +71,15 @@ public class CssCompressorDirective extends Directive {
 		node.jjtGetChild(0).render(context, content);
 		
 		//compress
-		if(enabled) {
-			try {
-				StringWriter result = new StringWriter();
-				CssCompressor compressor = new CssCompressor(new StringReader(content.toString()));
-				compressor.compress(result, yuiCssLineBreak);
-				writer.write(result.toString());
-			} catch (Exception e) {
-				writer.write(content.toString());
-				String msg = "Failed to compress content: "+content.toString();
-	            log.error(msg, e);
-	            throw new RuntimeException(msg, e);
-	            
-			}
-		} else {
+		try {
+			writer.write(xmlCompressor.compress(content.toString()));
+		} catch (Exception e) {
 			writer.write(content.toString());
+			String msg = "Failed to compress content: "+content.toString();
+            log.error(msg, e);
+            throw new RuntimeException(msg, e);
+            
 		}
-		
 		return true;
     	
     }

@@ -1,4 +1,4 @@
-package com.googlecode.htmlcompressor.compressor;
+package com.googlecode.jspcompressor.compressor;
 
 /*
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -35,7 +35,7 @@ import java.lang.Math;
  * 
  * @author <a href="mailto:serg472@gmail.com">Sergiy Kovalchuk</a>
  */
-public class HtmlCompressor implements Compressor {
+public class JspCompressor implements Compressor {
     
     private boolean enabled = true;
 

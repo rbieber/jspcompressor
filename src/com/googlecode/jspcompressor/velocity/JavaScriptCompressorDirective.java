@@ -1,4 +1,4 @@
-package com.googlecode.htmlcompressor.velocity;
+package com.googlecode.jspcompressor.velocity;
 
 /*
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,6 +15,7 @@ package com.googlecode.htmlcompressor.velocity;
  */
 
 import java.io.IOException;
+import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.Writer;
 
@@ -25,27 +26,34 @@ import org.apache.velocity.exception.ResourceNotFoundException;
 import org.apache.velocity.exception.TemplateInitException;
 import org.apache.velocity.runtime.RuntimeServices;
 import org.apache.velocity.runtime.directive.Directive;
-import org.apache.velocity.runtime.parser.node.Node;
 import org.apache.velocity.runtime.log.Log;
+import org.apache.velocity.runtime.parser.node.Node;
 
-import com.googlecode.htmlcompressor.compressor.HtmlCompressor;
+import com.yahoo.platform.yui.compressor.JavaScriptCompressor;
 
 /**
- * Velocity directive that compresses an HTML content within #compressHtml ... #end block.
- * Compression parameters are set by default (no JavaScript and CSS compression).
+ * Velocity directive that compresses an JavaScript content within #compressJs ... #end block.
+ * All JavaScript-related properties from {@link com.googlecode.jspcompressor.compressor.JspCompressor} are supported.
  * 
- * @see HtmlCompressor
+ * @see com.googlecode.jspcompressor.compressor.JspCompressor
+ * @see <a href="http://developer.yahoo.com/yui/compressor/">Yahoo YUI Compressor</a>
  * 
  * @author <a href="mailto:serg472@gmail.com">Sergiy Kovalchuk</a>
  */
-public class HtmlCompressorDirective extends Directive {
-	
-	private static final HtmlCompressor htmlCompressor = new HtmlCompressor();
+public class JavaScriptCompressorDirective extends Directive {
 	
 	private Log log;
+	
+	private boolean enabled = true;
+	
+	//YUICompressor settings
+	private boolean yuiJsNoMunge = false;
+	private boolean yuiJsPreserveAllSemiColons = false;
+	private boolean yuiJsDisableOptimizations = false;
+	private int yuiJsLineBreak = -1;
 
 	public String getName() {
-		return "compressHtml";
+		return "compressJs";
 	}
 
 	public int getType() {
@@ -58,17 +66,10 @@ public class HtmlCompressorDirective extends Directive {
 		log = rs.getLog();
 		
 		//set compressor properties
-		htmlCompressor.setEnabled(rs.getBoolean("userdirective.compressHtml.enabled", true));
-		htmlCompressor.setRemoveComments(rs.getBoolean("userdirective.compressHtml.removeComments", true));
-		htmlCompressor.setRemoveMultiSpaces(rs.getBoolean("userdirective.compressHtml.removeMultiSpaces", true));
-		htmlCompressor.setRemoveIntertagSpaces(rs.getBoolean("userdirective.compressHtml.removeIntertagSpaces", false));
-		htmlCompressor.setRemoveQuotes(rs.getBoolean("userdirective.compressHtml.removeQuotes", false));
-		htmlCompressor.setCompressJavaScript(rs.getBoolean("userdirective.compressHtml.compressJavaScript", false));
-		htmlCompressor.setCompressCss(rs.getBoolean("userdirective.compressHtml.compressCss", false));
-		htmlCompressor.setYuiJsNoMunge(rs.getBoolean("userdirective.compressHtml.yuiJsNoMunge", false));
-		htmlCompressor.setYuiJsPreserveAllSemiColons(rs.getBoolean("userdirective.compressHtml.yuiJsPreserveAllSemiColons", false));
-		htmlCompressor.setYuiJsLineBreak(rs.getInt("userdirective.compressHtml.yuiJsLineBreak", -1));
-		htmlCompressor.setYuiCssLineBreak(rs.getInt("userdirective.compressHtml.yuiCssLineBreak", -1));
+		enabled = rs.getBoolean("userdirective.compressJs.enabled", true);
+		yuiJsNoMunge = rs.getBoolean("userdirective.compressJs.yuiJsNoMunge", false);
+		yuiJsPreserveAllSemiColons = rs.getBoolean("userdirective.compressJs.yuiJsPreserveAllSemiColons", false);
+		yuiJsLineBreak = rs.getInt("userdirective.compressJs.yuiJsLineBreak", -1);
 	}
 
     public boolean render(InternalContextAdapter context, Writer writer, Node node) 
@@ -79,15 +80,23 @@ public class HtmlCompressorDirective extends Directive {
 		node.jjtGetChild(0).render(context, content);
 		
 		//compress
-		try {
-			writer.write(htmlCompressor.compress(content.toString()));
-		} catch (Exception e) {
+		if(enabled) {
+			try {
+				StringWriter result = new StringWriter();
+				JavaScriptCompressor compressor = new JavaScriptCompressor(new StringReader(content.toString()), null);
+				compressor.compress(result, yuiJsLineBreak, !yuiJsNoMunge, false, yuiJsPreserveAllSemiColons, yuiJsDisableOptimizations);
+				writer.write(result.toString());
+			} catch (Exception e) {
+				writer.write(content.toString());
+				String msg = "Failed to compress content: "+content.toString();
+	            log.error(msg, e);
+	            throw new RuntimeException(msg, e);
+	            
+			}
+		} else {
 			writer.write(content.toString());
-			String msg = "Failed to compress content: "+content.toString();
-            log.error(msg, e);
-            throw new RuntimeException(msg, e);
-            
 		}
+		
 		return true;
     	
     }

@@ -1,4 +1,4 @@
-package com.googlecode.htmlcompressor;
+package com.googlecode.jspcompressor;
 
 /*
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -26,9 +26,9 @@ import java.io.Reader;
 import java.io.Writer;
 import java.nio.charset.Charset;
 
-import com.googlecode.htmlcompressor.compressor.Compressor;
-import com.googlecode.htmlcompressor.compressor.HtmlCompressor;
-import com.googlecode.htmlcompressor.compressor.XmlCompressor;
+import com.googlecode.jspcompressor.compressor.Compressor;
+import com.googlecode.jspcompressor.compressor.JspCompressor;
+import com.googlecode.jspcompressor.compressor.XmlCompressor;
 
 /**
  * Wrapper for HTML and XML compressor classes that allows using them from a command line.
@@ -142,7 +142,7 @@ public class CmdLineCompressor {
 			Compressor compressor = null;
 			if (type.equalsIgnoreCase("html")) {
 
-				HtmlCompressor htmlCompressor = new HtmlCompressor();
+				JspCompressor htmlCompressor = new JspCompressor();
 				htmlCompressor.setRemoveComments(parser.getOptionValue(preserveCommentsOpt) == null);
 				htmlCompressor.setRemoveMultiSpaces(parser.getOptionValue(preserveMultiSpacesOpt) == null);
 				htmlCompressor.setRemoveIntertagSpaces(parser.getOptionValue(removeIntertagSpacesOpt) != null);
@@ -248,7 +248,7 @@ public class CmdLineCompressor {
 	}
 
 	private static void printUsage() {
-		System.out.println("Usage: java -jar htmlcompressor.jar [options] [input file]\n\n"
+		System.out.println("Usage: java -jar jspcompressor.jar [options] [input file]\n\n"
 
 						+ "<input file>                  If not provided reads from stdin\n\n"
 

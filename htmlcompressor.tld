@@ -8,7 +8,7 @@
 	<tag>
 		<description>Compresses HTML content within tags.</description>
 		<name>html</name>
-		<tag-class>com.googlecode.htmlcompressor.taglib.HtmlCompressorTag</tag-class>
+		<tag-class>com.googlecode.jspcompressor.taglib.HtmlCompressorTag</tag-class>
 		<body-content>JSP</body-content>
 		<attribute>
 			<name>enabled</name>
@@ -74,7 +74,7 @@
 	<tag>
 		<description>Compresses XML content within tags.</description>
 		<name>xml</name>
-		<tag-class>com.googlecode.htmlcompressor.taglib.XmlCompressorTag</tag-class>
+		<tag-class>com.googlecode.jspcompressor.taglib.XmlCompressorTag</tag-class>
 		<body-content>JSP</body-content>
 		<attribute>
 			<name>enabled</name>
@@ -95,7 +95,7 @@
 	<tag>
 		<description>Compresses JavaScript content within tags.</description>
 		<name>js</name>
-		<tag-class>com.googlecode.htmlcompressor.taglib.JavaScriptCompressorTag</tag-class>
+		<tag-class>com.googlecode.jspcompressor.taglib.JavaScriptCompressorTag</tag-class>
 		<body-content>JSP</body-content>
 		<attribute>
 			<name>enabled</name>
@@ -126,7 +126,7 @@
 	<tag>
 		<description>Compresses CSS content within tags.</description>
 		<name>css</name>
-		<tag-class>com.googlecode.htmlcompressor.taglib.CssCompressorTag</tag-class>
+		<tag-class>com.googlecode.jspcompressor.taglib.CssCompressorTag</tag-class>
 		<body-content>JSP</body-content>
 		<attribute>
 			<name>enabled</name>

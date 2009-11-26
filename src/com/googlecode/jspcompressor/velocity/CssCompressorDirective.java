@@ -1,4 +1,4 @@
-package com.googlecode.htmlcompressor.velocity;
+package com.googlecode.jspcompressor.velocity;
 
 /*
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -29,32 +29,28 @@ import org.apache.velocity.runtime.directive.Directive;
 import org.apache.velocity.runtime.log.Log;
 import org.apache.velocity.runtime.parser.node.Node;
 
-import com.googlecode.htmlcompressor.compressor.HtmlCompressor;
-import com.yahoo.platform.yui.compressor.JavaScriptCompressor;
+import com.yahoo.platform.yui.compressor.CssCompressor;
 
 /**
- * Velocity directive that compresses an JavaScript content within #compressJs ... #end block.
- * All JavaScript-related properties from {@link HtmlCompressor} are supported.
+ * Velocity directive that compresses an CSS content within #compressCss ... #end block.
+ * All CSS-related properties from {@link com.googlecode.jspcompressor.compressor.JspCompressor} are supported.
  * 
- * @see HtmlCompressor
+ * @see com.googlecode.jspcompressor.compressor.JspCompressor
  * @see <a href="http://developer.yahoo.com/yui/compressor/">Yahoo YUI Compressor</a>
  * 
  * @author <a href="mailto:serg472@gmail.com">Sergiy Kovalchuk</a>
  */
-public class JavaScriptCompressorDirective extends Directive {
+public class CssCompressorDirective extends Directive {
 	
 	private Log log;
 	
 	private boolean enabled = true;
 	
 	//YUICompressor settings
-	private boolean yuiJsNoMunge = false;
-	private boolean yuiJsPreserveAllSemiColons = false;
-	private boolean yuiJsDisableOptimizations = false;
-	private int yuiJsLineBreak = -1;
+	private int yuiCssLineBreak = -1;
 
 	public String getName() {
-		return "compressJs";
+		return "compressCss";
 	}
 
 	public int getType() {
@@ -67,10 +63,8 @@ public class JavaScriptCompressorDirective extends Directive {
 		log = rs.getLog();
 		
 		//set compressor properties
-		enabled = rs.getBoolean("userdirective.compressJs.enabled", true);
-		yuiJsNoMunge = rs.getBoolean("userdirective.compressJs.yuiJsNoMunge", false);
-		yuiJsPreserveAllSemiColons = rs.getBoolean("userdirective.compressJs.yuiJsPreserveAllSemiColons", false);
-		yuiJsLineBreak = rs.getInt("userdirective.compressJs.yuiJsLineBreak", -1);
+		enabled = rs.getBoolean("userdirective.compressCss.enabled", true);
+		yuiCssLineBreak = rs.getInt("userdirective.compressCss.yuiCssLineBreak", -1);
 	}
 
     public boolean render(InternalContextAdapter context, Writer writer, Node node) 
@@ -84,8 +78,8 @@ public class JavaScriptCompressorDirective extends Directive {
 		if(enabled) {
 			try {
 				StringWriter result = new StringWriter();
-				JavaScriptCompressor compressor = new JavaScriptCompressor(new StringReader(content.toString()), null);
-				compressor.compress(result, yuiJsLineBreak, !yuiJsNoMunge, false, yuiJsPreserveAllSemiColons, yuiJsDisableOptimizations);
+				CssCompressor compressor = new CssCompressor(new StringReader(content.toString()));
+				compressor.compress(result, yuiCssLineBreak);
 				writer.write(result.toString());
 			} catch (Exception e) {
 				writer.write(content.toString());

@@ -1,4 +1,4 @@
-package com.googlecode.htmlcompressor.taglib;
+package com.googlecode.jspcompressor.taglib;
 
 /*
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -22,14 +22,13 @@ import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.tagext.BodyContent;
 import javax.servlet.jsp.tagext.BodyTagSupport;
 
-import com.googlecode.htmlcompressor.compressor.HtmlCompressor;
 import com.yahoo.platform.yui.compressor.CssCompressor;
 
 /**
  * JSP tag that compresses an CSS content within &lt;compress:css> using <a href="http://developer.yahoo.com/yui/compressor/">Yahoo YUI Compressor</a>.
- * All CSS-related properties from {@link HtmlCompressor} are supported.
+ * All CSS-related properties from {@link com.googlecode.jspcompressor.compressor.JspCompressor} are supported.
  * 
- * @see HtmlCompressor
+ * @see com.googlecode.jspcompressor.compressor.JspCompressor
  * @see <a href="http://developer.yahoo.com/yui/compressor/">Yahoo YUI Compressor</a>
  * 
  * @author <a href="mailto:serg472@gmail.com">Sergiy Kovalchuk</a>
@@ -73,14 +72,14 @@ public class CssCompressorTag extends BodyTagSupport {
 	}
 	
 	/**
-	 * @see HtmlCompressor#setYuiCssLineBreak(int)
+	 * @see com.googlecode.jspcompressor.compressor.JspCompressor#setYuiCssLineBreak(int)
 	 */
 	public void setYuiCssLineBreak(int yuiCssLineBreak) {
 		this.yuiCssLineBreak = yuiCssLineBreak;
 	}
 	
 	/**
-	 * @see HtmlCompressor#setEnabled(boolean)
+	 * @see com.googlecode.jspcompressor.compressor.JspCompressor#setEnabled(boolean)
 	 */
 	public void setEnabled(boolean enabled) {
 		this.enabled = enabled;

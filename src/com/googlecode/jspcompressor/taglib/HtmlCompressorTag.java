@@ -1,4 +1,4 @@
-package com.googlecode.htmlcompressor.taglib;
+package com.googlecode.jspcompressor.taglib;
 
 /*
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,13 +20,13 @@ import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.tagext.BodyContent;
 import javax.servlet.jsp.tagext.BodyTagSupport;
 
-import com.googlecode.htmlcompressor.compressor.HtmlCompressor;
+import com.googlecode.jspcompressor.compressor.JspCompressor;
 
 /**
  * JSP tag that compresses an HTML content within &lt;compress:html>.
  * Compression parameters are set by default (no JavaScript and CSS compression).
  * 
- * @see HtmlCompressor
+ * @see com.googlecode.jspcompressor.compressor.JspCompressor
  * 
  * @author <a href="mailto:serg472@gmail.com">Sergiy Kovalchuk</a>
  */
@@ -58,7 +58,7 @@ public class HtmlCompressorTag extends BodyTagSupport {
 		BodyContent bodyContent = getBodyContent();
 		String content = bodyContent.getString();
 		
-		HtmlCompressor compressor = new HtmlCompressor();
+		JspCompressor compressor = new JspCompressor();
 		compressor.setEnabled(enabled);
 		compressor.setRemoveComments(removeComments);
 		compressor.setRemoveMultiSpaces(removeMultiSpaces);
@@ -86,84 +86,84 @@ public class HtmlCompressorTag extends BodyTagSupport {
 	}
 	
 	/**
-	 * @see HtmlCompressor#setCompressJavaScript(boolean)
+	 * @see com.googlecode.jspcompressor.compressor.JspCompressor#setCompressJavaScript(boolean)
 	 */
 	public void setCompressJavaScript(boolean compressJavaScript) {
 		this.compressJavaScript = compressJavaScript;
 	}
 
 	/**
-	 * @see HtmlCompressor#setCompressCss(boolean)
+	 * @see com.googlecode.jspcompressor.compressor.JspCompressor#setCompressCss(boolean)
 	 */
 	public void setCompressCss(boolean compressCss) {
 		this.compressCss = compressCss;
 	}
 
 	/**
-	 * @see HtmlCompressor#setYuiJsNoMunge(boolean)
+	 * @see com.googlecode.jspcompressor.compressor.JspCompressor#setYuiJsNoMunge(boolean)
 	 */
 	public void setYuiJsNoMunge(boolean yuiJsNoMunge) {
 		this.yuiJsNoMunge = yuiJsNoMunge;
 	}
 
 	/**
-	 * @see HtmlCompressor#setYuiJsPreserveAllSemiColons(boolean)
+	 * @see com.googlecode.jspcompressor.compressor.JspCompressor#setYuiJsPreserveAllSemiColons(boolean)
 	 */
 	public void setYuiJsPreserveAllSemiColons(boolean yuiJsPreserveAllSemiColons) {
 		this.yuiJsPreserveAllSemiColons = yuiJsPreserveAllSemiColons;
 	}
 
 	/**
-	 * @see HtmlCompressor#setYuiJsDisableOptimizations(boolean)
+	 * @see com.googlecode.jspcompressor.compressor.JspCompressor#setYuiJsDisableOptimizations(boolean)
 	 */
 	public void setYuiJsDisableOptimizations(boolean yuiJsDisableOptimizations) {
 		this.yuiJsDisableOptimizations = yuiJsDisableOptimizations;
 	}
 	
 	/**
-	 * @see HtmlCompressor#setYuiJsLineBreak(int)
+	 * @see com.googlecode.jspcompressor.compressor.JspCompressor#setYuiJsLineBreak(int)
 	 */
 	public void setYuiJsLineBreak(int yuiJsLineBreak) {
 		this.yuiJsLineBreak = yuiJsLineBreak;
 	}
 	
 	/**
-	 * @see HtmlCompressor#setYuiCssLineBreak(int)
+	 * @see com.googlecode.jspcompressor.compressor.JspCompressor#setYuiCssLineBreak(int)
 	 */
 	public void setYuiCssLineBreak(int yuiCssLineBreak) {
 		this.yuiCssLineBreak = yuiCssLineBreak;
 	}
 
 	/**
-	 * @see HtmlCompressor#setRemoveQuotes(boolean)
+	 * @see com.googlecode.jspcompressor.compressor.JspCompressor#setRemoveQuotes(boolean)
 	 */
 	public void setRemoveQuotes(boolean removeQuotes) {
 		this.removeQuotes = removeQuotes;
 	}
 
 	/**
-	 * @see HtmlCompressor#setEnabled(boolean)
+	 * @see com.googlecode.jspcompressor.compressor.JspCompressor#setEnabled(boolean)
 	 */
 	public void setEnabled(boolean enabled) {
 		this.enabled = enabled;
 	}
 
 	/**
-	 * @see HtmlCompressor#setRemoveComments(boolean)
+	 * @see com.googlecode.jspcompressor.compressor.JspCompressor#setRemoveComments(boolean)
 	 */
 	public void setRemoveComments(boolean removeComments) {
 		this.removeComments = removeComments;
 	}
 
 	/**
-	 * @see HtmlCompressor#setRemoveMultiSpaces(boolean)
+	 * @see com.googlecode.jspcompressor.compressor.JspCompressor#setRemoveMultiSpaces(boolean)
 	 */
 	public void setRemoveMultiSpaces(boolean removeMultiSpaces) {
 		this.removeMultiSpaces = removeMultiSpaces;
 	}
 
 	/**
-	 * @see HtmlCompressor#setRemoveIntertagSpaces(boolean)
+	 * @see com.googlecode.jspcompressor.compressor.JspCompressor#setRemoveIntertagSpaces(boolean)
 	 */
 	public void setRemoveIntertagSpaces(boolean removeIntertagSpaces) {
 		this.removeIntertagSpaces = removeIntertagSpaces;

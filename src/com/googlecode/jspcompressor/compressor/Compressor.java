@@ -1,4 +1,4 @@
-package com.googlecode.htmlcompressor.compressor;
+package com.googlecode.jspcompressor.compressor;
 
 /*
  * Licensed under the Apache License, Version 2.0 (the "License");

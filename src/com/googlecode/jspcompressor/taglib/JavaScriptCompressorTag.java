@@ -1,4 +1,4 @@
-package com.googlecode.htmlcompressor.taglib;
+package com.googlecode.jspcompressor.taglib;
 
 /*
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -22,14 +22,13 @@ import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.tagext.BodyContent;
 import javax.servlet.jsp.tagext.BodyTagSupport;
 
-import com.googlecode.htmlcompressor.compressor.HtmlCompressor;
 import com.yahoo.platform.yui.compressor.JavaScriptCompressor;
 
 /**
  * JSP tag that compresses an JavaScript content within &lt;compress:js> using <a href="http://developer.yahoo.com/yui/compressor/">Yahoo YUI Compressor</a>.
- * All JavaScript-related properties from {@link HtmlCompressor} are supported.
+ * All JavaScript-related properties from {@link com.googlecode.jspcompressor.compressor.JspCompressor} are supported.
  * 
- * @see HtmlCompressor
+ * @see com.googlecode.jspcompressor.compressor.JspCompressor
  * @see <a href="http://developer.yahoo.com/yui/compressor/">Yahoo YUI Compressor</a>
  * 
  * @author <a href="mailto:serg472@gmail.com">Sergiy Kovalchuk</a>
@@ -77,35 +76,35 @@ public class JavaScriptCompressorTag extends BodyTagSupport {
 	}
 	
 	/**
-	 * @see HtmlCompressor#setYuiJsNoMunge(boolean)
+	 * @see com.googlecode.jspcompressor.compressor.JspCompressor#setYuiJsNoMunge(boolean)
 	 */
 	public void setYuiJsNoMunge(boolean yuiJsNoMunge) {
 		this.yuiJsNoMunge = yuiJsNoMunge;
 	}
 
 	/**
-	 * @see HtmlCompressor#setYuiJsPreserveAllSemiColons(boolean)
+	 * @see com.googlecode.jspcompressor.compressor.JspCompressor#setYuiJsPreserveAllSemiColons(boolean)
 	 */
 	public void setYuiJsPreserveAllSemiColons(boolean yuiJsPreserveAllSemiColons) {
 		this.yuiJsPreserveAllSemiColons = yuiJsPreserveAllSemiColons;
 	}
 
 	/**
-	 * @see HtmlCompressor#setYuiJsDisableOptimizations(boolean)
+	 * @see com.googlecode.jspcompressor.compressor.JspCompressor#setYuiJsDisableOptimizations(boolean)
 	 */
 	public void setYuiJsDisableOptimizations(boolean yuiJsDisableOptimizations) {
 		this.yuiJsDisableOptimizations = yuiJsDisableOptimizations;
 	}
 	
 	/**
-	 * @see HtmlCompressor#setYuiJsLineBreak(int)
+	 * @see com.googlecode.jspcompressor.compressor.JspCompressor#setYuiJsLineBreak(int)
 	 */
 	public void setYuiJsLineBreak(int yuiJsLineBreak) {
 		this.yuiJsLineBreak = yuiJsLineBreak;
 	}
 	
 	/**
-	 * @see HtmlCompressor#setEnabled(boolean)
+	 * @see com.googlecode.jspcompressor.compressor.JspCompressor#setEnabled(boolean)
 	 */
 	public void setEnabled(boolean enabled) {
 		this.enabled = enabled;

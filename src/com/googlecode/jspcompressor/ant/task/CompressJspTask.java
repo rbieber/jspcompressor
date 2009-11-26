@@ -1,4 +1,4 @@
-package com.googlecode.htmlcompressor.ant.task;
+package com.googlecode.jspcompressor.ant.task;
 
 /*
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,7 +14,7 @@ package com.googlecode.htmlcompressor.ant.task;
  * limitations under the License.
  */
 
-import com.googlecode.htmlcompressor.compressor.HtmlCompressor;
+import com.googlecode.jspcompressor.compressor.JspCompressor;
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.DirectoryScanner;
 import org.apache.tools.ant.Task;
@@ -29,7 +29,7 @@ import java.util.Vector;
  * 
  * @author <a href="mailto:ron@bieberlabs.com">Ron Bieber</a>
  */
-public class CompressHtmlTask extends Task {
+public class CompressJspTask extends Task {
     private Vector filesets = new Vector();
     private String destdir = null;
     private boolean removeComments = true;
@@ -41,7 +41,7 @@ public class CompressHtmlTask extends Task {
     private boolean enabled = true;
     private boolean failOnError = false;
 
-    private HtmlCompressor compressor = new HtmlCompressor();
+    private JspCompressor compressor = new JspCompressor();
     
     /**
      * Main execution function of the Ant Task.
