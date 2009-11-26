@@ -38,6 +38,10 @@ import java.lang.Math;
 public class HtmlCompressor implements Compressor {
     
     private boolean enabled = true;
+
+    private int total = 0;
+    private int failed = 0;
+
     
     //default settings
     private boolean removeComments = true;
@@ -286,7 +290,6 @@ public class HtmlCompressor implements Compressor {
 			            
             scriptBlock = preserveBlocks(scriptBlock, jspAllPattern, tempJavaScriptBlock, jspBlocks);
 
-
             if (!compressJavaScript) {
                 scriptBlock = trimEmptySpace(scriptBlock);
             } else {
@@ -354,6 +357,7 @@ public class HtmlCompressor implements Compressor {
         String originalSource = new String(source);
         String scriptBlock = null;
 
+        total++;
         source = commentMarkersInScript.matcher(source).replaceAll("");
 
         //check if block is not empty
@@ -383,6 +387,8 @@ public class HtmlCompressor implements Compressor {
             
                 scriptBlock = returnBlocks(result.toString(), tempJSTagPattern, tagBlocks);    
             } catch (Exception e) {
+                failed++;
+//                throw new Exception("Returning " + scriptBlock);
                 return(trimEmptySpace(originalSource));
             }
 
@@ -404,7 +410,13 @@ public class HtmlCompressor implements Compressor {
             StringWriter result = new StringWriter();
             CssCompressor compressor = new CssCompressor(new StringReader(styleMatcher.group(1)));
             compressor.compress(result, yuiCssLineBreak);
-            
+
+            if (debugMode) {
+                int originalSize = styleMatcher.group(1).length();
+                int newSize = result.toString().length();
+
+                System.out.println("Compressed inline CSS - original size was " + Integer.toString(originalSize) + " bytes, new size is " + Integer.toString(newSize) + " bytes - (" + compressionRatio(originalSize, newSize) + "% reduction)");
+            }
             return (new StringBuilder(source.substring(0, styleMatcher.start(1))).append(result.toString()).append(source.substring(styleMatcher.end(1)))).toString();
         
         } else {
@@ -755,6 +767,14 @@ public class HtmlCompressor implements Compressor {
      */     
     public void setDebugMode(boolean debugMode) {
         this.debugMode = debugMode;
+    }
+
+    public int getFailed() {
+            return(failed);
+    }
+
+    public int getTotal() {
+        return(total);
     }
     
 }
