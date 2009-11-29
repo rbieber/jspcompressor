@@ -50,7 +50,7 @@
 	<target name="build.javadoc" depends="build.classes">
 		<delete dir="${doc.dir}" quiet="true"/>
 		<mkdir dir="${doc.dir}" />
-	    <javadoc packagenames="com.googlecode.jspcompressor*"
+	    <javadoc packagenames="com.googlecode.jspcompressor.*"
 	             destdir="${doc.dir}"
 	             author="true"
 	             private="false"
