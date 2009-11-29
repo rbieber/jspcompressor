@@ -92,3 +92,14 @@ functionality has been enhanced, it should still work on plain ol' html files as
 I have also not kept the velocity tags and custom tag up to date, as this didn't necessarily map to the problem space I
 am dealing with (yet).   I welcome contributions to bring these up to date.
 
+Building JavaDoc
+----------------
+I have removed the JavaDoc documentation from the repository.   To build it, execute the following command:
+
+ant build.javadoc
+
+This will build and deposit the JavaDoc documentation in the doc/ directory.
+
+You may get warnings about certain Ant related classes not being available. Set the ant.dir property in the build.properties
+file to the location of ant.jar to fix these warnings.
+
