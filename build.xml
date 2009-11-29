@@ -61,6 +61,7 @@
 	    		<pathelement location="${lib.dir}/velocity-1.6.2.jar"/>
                 <pathelement location="${lib.dir}/rhino-1.6R7.jar"/>
             	<pathelement location="${lib.dir}/jargs-1.0.jar"/>
+                <pathelement location="${ant.lib}/ant.jar"/>
             </classpath>
 	      <sourcepath>
 	        <pathelement path="${src.dir}" />

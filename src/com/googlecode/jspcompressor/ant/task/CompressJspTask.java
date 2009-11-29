@@ -221,7 +221,6 @@ public class CompressJspTask extends Task {
      * invocation of the task.
      * 
      * @param set Ant FileSet object.
-     * @return nothing
      */     
      
     public void addFileset(FileSet set) {
@@ -231,8 +230,7 @@ public class CompressJspTask extends Task {
     /**
      * Sets the property that causes the compressor to remove JSP comments from the files processed.
      * 
-     * @param compress true if JSP comments should be removed, false otherwise.
-     * @return nothing
+     * @param removeComments true if JSP comments should be removed, false otherwise.
      */ 
         
     public void setRemoveJspComments(boolean removeComments) {
@@ -243,8 +241,7 @@ public class CompressJspTask extends Task {
     /**
      * Sets the property that causes the compressor to remove HTML comments from the files processed.
      * 
-     * @param compress true if comments should be removed, false otherwise.
-     * @return nothing
+     * @param removeComments true if comments should be removed, false otherwise.
      */ 
     public void setRemoveComments(boolean removeComments) {
         this.removeComments = removeComments;
@@ -255,7 +252,6 @@ public class CompressJspTask extends Task {
      * This is false by default.
      * 
      * @param compress true if inline Javascript compression should be compressed, false otherwise.
-     * @return nothing
      */        
     public void setCompressJs(boolean compress) {
         this.compressJS = compress;
@@ -266,7 +262,6 @@ public class CompressJspTask extends Task {
      * This is true by default.
      * 
      * @param compress true if CSS compression is to be used, false otherwise.
-     * @return nothing
      */       
     public void setCompressCSS(boolean compress) {
         this.compressCSS = compress;
@@ -276,7 +271,6 @@ public class CompressJspTask extends Task {
      * Sets the destination directory in which processed files are deposited.
      * 
      * @param destpath path of directory in which to deposit processed files
-     * @return nothing
      */    
     public void setDestDir(String destpath) {
         destdir = destpath;
@@ -287,7 +281,6 @@ public class CompressJspTask extends Task {
      * reference the Struts <html:form> tags.
      * 
      * @param skipFormComments true if <html:form> comments are to be skipped, false if they should be removed.
-     * @return nothing
      */    
     public void setSkipStrutsFormComments(boolean skipFormComments) {
        skipStrutsFormTagComments = skipFormComments;

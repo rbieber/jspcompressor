@@ -758,8 +758,6 @@ public class JspCompressor implements Compressor {
      * <html:tag> opening and closing tags in comments which caused the proper structures to (for some reason)
      * still be initialized properly, but did not use the tag, and  then to use standard for tags around your
      * struts controls.   Kind of odd, but thats how it works.
-     *
-     * @return Nothing
      */    
     public void setSkipStrutsFormComments(boolean leaveComments) {
        skipCommentsWithStrutsForm = leaveComments;
@@ -767,8 +765,6 @@ public class JspCompressor implements Compressor {
 
     /**
      * If set to <code>true</code> the compressor will display debug messages as it works.
-     *
-     * @return Nothing
      */     
     public void setDebugMode(boolean debugMode) {
         this.debugMode = debugMode;
@@ -799,7 +795,6 @@ public class JspCompressor implements Compressor {
      * be returned from the compressor - so you'll still get compression, just not the full advantage
      * of the YUI compressor.
      *
-     * @return  Nothing
      */
     public void setFailOnError(boolean failonerror) {
         this.failOnError = failonerror;
