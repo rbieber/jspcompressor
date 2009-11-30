@@ -78,7 +78,7 @@ public class JspCompressor implements Compressor {
     //compiled regex patterns
     // The commentStrutsFormHack pattern purposely excludes any comment with <html:form> in it due to a work around
     // for a struts 1.0 bug that we use. 
-    private static final Pattern commentMarkersInScript = Pattern.compile("(<!--)(.*?)(\\/\\/-->)", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
+    private static final Pattern commentMarkersInScript = Pattern.compile("(<!--)|(\\/\\/-->)", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
     private static final Pattern commentStrutsFormCommentPattern = Pattern.compile("<!--[^\\[].*?html:form[^>]*?>.*?-->", Pattern.CASE_INSENSITIVE);
     private static final Pattern commentPattern = Pattern.compile("<!--[^\\[].*?-->", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
     private static final Pattern jspCommentPattern = Pattern.compile("<%--.+?--%>", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
@@ -283,11 +283,11 @@ public class JspCompressor implements Compressor {
 
             scriptBlock = jspCommentPattern.matcher(scriptBlock).replaceAll("");
             
-            // remove any comment markers you might find in Javascript code (<!-- //-->)
-            scriptBlock = commentMarkersInScript.matcher(scriptBlock).replaceAll("$2");
-            
             // yes, HTML comments are sometimes found in Javascript.
             scriptBlock = commentPattern.matcher(scriptBlock).replaceAll("");
+
+            // remove any comment markers you might find in Javascript code (<!-- //-->)
+            scriptBlock = commentMarkersInScript.matcher(scriptBlock).replaceAll("");
 			            
             scriptBlock = preserveBlocks(scriptBlock, jspAllPattern, tempJavaScriptBlock, jspBlocks);
 
