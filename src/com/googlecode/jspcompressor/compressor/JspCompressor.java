@@ -78,7 +78,7 @@ public class JspCompressor implements Compressor {
     //compiled regex patterns
     // The commentStrutsFormHack pattern purposely excludes any comment with <html:form> in it due to a work around
     // for a struts 1.0 bug that we use. 
-    private static final Pattern commentMarkersInScript = Pattern.compile("(<!--)(.*?)(\\/\\/-->)", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
+    private static final Pattern commentMarkersInScript = Pattern.compile("(<!--)(.*?)(\\/\\/[ \\t]*-->)", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
     private static final Pattern commentStrutsFormCommentPattern = Pattern.compile("<!--[^\\[].*?html:form[^>]*?>.*?-->", Pattern.CASE_INSENSITIVE);
     private static final Pattern commentPattern = Pattern.compile("<!--[^\\[].*?-->", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
     private static final Pattern jspCommentPattern = Pattern.compile("<%--.+?--%>", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
