@@ -31,7 +31,7 @@ import com.googlecode.jspcompressor.compressor.JspCompressor;
  * @author <a href="mailto:serg472@gmail.com">Sergiy Kovalchuk</a>
  */
 @SuppressWarnings("serial")
-public class HtmlCompressorTag extends BodyTagSupport {
+public class JspCompressorTag extends BodyTagSupport {
 	
 	private boolean enabled = true;
 	
@@ -44,7 +44,9 @@ public class HtmlCompressorTag extends BodyTagSupport {
 	private boolean removeQuotes = false;
 	private boolean compressJavaScript = false;
 	private boolean compressCss = false;
-	
+    private boolean removeJspComments = true;
+    private boolean skipCommentsWithStrutsForm = false;
+
 	//YUICompressor settings
 	private boolean yuiJsNoMunge = false;
 	private boolean yuiJsPreserveAllSemiColons = false;
@@ -71,6 +73,8 @@ public class HtmlCompressorTag extends BodyTagSupport {
 		compressor.setYuiJsDisableOptimizations(yuiJsDisableOptimizations);
 		compressor.setYuiJsLineBreak(yuiJsLineBreak);
 		compressor.setYuiCssLineBreak(yuiCssLineBreak);
+        compressor.setSkipStrutsFormComments(this.skipCommentsWithStrutsForm);
+        compressor.setRemoveJspComments(this.removeJspComments);
 		
 		try {
 			bodyContent.clear();
@@ -169,4 +173,23 @@ public class HtmlCompressorTag extends BodyTagSupport {
 		this.removeIntertagSpaces = removeIntertagSpaces;
 	}
 
-}
+
+    /**
+     * Sets the property that causes the compressor to leave HTML comments that
+     * reference the Struts <html:form> tags.
+     *
+     * @param skipFormComments true if <html:form> comments are to be skipped, false if they should be removed.
+     */
+    public void setSkipStrutsFormComments(boolean skipFormComments) {
+        skipCommentsWithStrutsForm = skipFormComments;
+    }
+
+    /**
+     * If set to <code>true</code> all HTML comments will be removed.
+     * Default is <code>true</code>.
+     *
+     * @param removeComments set <code>true</code> to remove all HTML comments
+     */
+    public void setRemoveJspComments(boolean removeComments) {
+        this.removeJspComments = removeComments;
+    }}

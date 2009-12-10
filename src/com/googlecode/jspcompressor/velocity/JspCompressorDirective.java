@@ -38,14 +38,14 @@ import com.googlecode.jspcompressor.compressor.JspCompressor;
  * 
  * @author <a href="mailto:serg472@gmail.com">Sergiy Kovalchuk</a>
  */
-public class HtmlCompressorDirective extends Directive {
+public class JspCompressorDirective extends Directive {
 	
-	private static final JspCompressor htmlCompressor = new JspCompressor();
+	private static final JspCompressor compressor = new JspCompressor();
 	
 	private Log log;
 
-	public String getName() {
-		return "compressHtml";
+    public String getName() {
+		return "compressJsp";
 	}
 
 	public int getType() {
@@ -58,17 +58,19 @@ public class HtmlCompressorDirective extends Directive {
 		log = rs.getLog();
 		
 		//set compressor properties
-		htmlCompressor.setEnabled(rs.getBoolean("userdirective.compressHtml.enabled", true));
-		htmlCompressor.setRemoveComments(rs.getBoolean("userdirective.compressHtml.removeComments", true));
-		htmlCompressor.setRemoveMultiSpaces(rs.getBoolean("userdirective.compressHtml.removeMultiSpaces", true));
-		htmlCompressor.setRemoveIntertagSpaces(rs.getBoolean("userdirective.compressHtml.removeIntertagSpaces", false));
-		htmlCompressor.setRemoveQuotes(rs.getBoolean("userdirective.compressHtml.removeQuotes", false));
-		htmlCompressor.setCompressJavaScript(rs.getBoolean("userdirective.compressHtml.compressJavaScript", false));
-		htmlCompressor.setCompressCss(rs.getBoolean("userdirective.compressHtml.compressCss", false));
-		htmlCompressor.setYuiJsNoMunge(rs.getBoolean("userdirective.compressHtml.yuiJsNoMunge", false));
-		htmlCompressor.setYuiJsPreserveAllSemiColons(rs.getBoolean("userdirective.compressHtml.yuiJsPreserveAllSemiColons", false));
-		htmlCompressor.setYuiJsLineBreak(rs.getInt("userdirective.compressHtml.yuiJsLineBreak", -1));
-		htmlCompressor.setYuiCssLineBreak(rs.getInt("userdirective.compressHtml.yuiCssLineBreak", -1));
+		compressor.setEnabled(rs.getBoolean("userdirective.compressHtml.enabled", true));
+		compressor.setRemoveComments(rs.getBoolean("userdirective.compressHtml.removeComments", true));
+		compressor.setRemoveMultiSpaces(rs.getBoolean("userdirective.compressHtml.removeMultiSpaces", true));
+		compressor.setRemoveIntertagSpaces(rs.getBoolean("userdirective.compressHtml.removeIntertagSpaces", false));
+		compressor.setRemoveQuotes(rs.getBoolean("userdirective.compressHtml.removeQuotes", false));
+		compressor.setCompressJavaScript(rs.getBoolean("userdirective.compressHtml.compressJavaScript", false));
+		compressor.setCompressCss(rs.getBoolean("userdirective.compressHtml.compressCss", false));
+		compressor.setYuiJsNoMunge(rs.getBoolean("userdirective.compressHtml.yuiJsNoMunge", false));
+		compressor.setYuiJsPreserveAllSemiColons(rs.getBoolean("userdirective.compressHtml.yuiJsPreserveAllSemiColons", false));
+		compressor.setYuiJsLineBreak(rs.getInt("userdirective.compressHtml.yuiJsLineBreak", -1));
+		compressor.setYuiCssLineBreak(rs.getInt("userdirective.compressHtml.yuiCssLineBreak", -1));
+        compressor.setSkipStrutsFormComments(rs.getBoolean("userdirective.compressJsp.skipStrutsFormComments", false));
+        compressor.setRemoveJspComments(rs.getBoolean("userdiretive.compressJsp.removeJspComments", false));
 	}
 
     public boolean render(InternalContextAdapter context, Writer writer, Node node) 
@@ -80,7 +82,7 @@ public class HtmlCompressorDirective extends Directive {
 		
 		//compress
 		try {
-			writer.write(htmlCompressor.compress(content.toString()));
+			writer.write(compressor.compress(content.toString()));
 		} catch (Exception e) {
 			writer.write(content.toString());
 			String msg = "Failed to compress content: "+content.toString();

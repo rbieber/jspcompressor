@@ -26,7 +26,7 @@ import java.util.Vector;
 
 /**
  * Ant Task that wraps the htmlcompressor library written by Sergiy Kovalchuck
- * 
+ *
  * @author <a href="mailto:ron@bieberlabs.com">Ron Bieber</a>
  */
 public class CompressJspTask extends Task {
@@ -42,49 +42,49 @@ public class CompressJspTask extends Task {
     private boolean failOnError = false;
 
     private JspCompressor compressor = new JspCompressor();
-    
+
     /**
      * Main execution function of the Ant Task.
      */
-     
+
     public void execute() {
         String sourceFileName = null, destFileName = null;
-       
+
         // Validate that required properties are set 
         if (destdir == null || destdir.length() == 0) {
             throw new BuildException("CompressHTML:  You must specify a destination directory to deposit the new files ...");
         }
-        
+
         if (filesets.size() == 0) {
             throw new BuildException("CompressHTML:  No files specified to process for compression.");
         }
-        
+
         Enumeration e = filesets.elements();
-        
+
         while (e.hasMoreElements()) {
             FileSet fs = (FileSet) e.nextElement();
             DirectoryScanner ds = fs.getDirectoryScanner(getProject());
-            
+
             String[] includedFiles = ds.getIncludedFiles();
 
             // Show a message so the user knows we're actually doing something.
             log("Compressing " + includedFiles.length + " files to " + this.destdir + " ...");
-                
-            
+
+
             for (int i = 0; i < includedFiles.length; i++) {
                 File f = new File(ds.getBasedir(), includedFiles[i]);
                 File d = new File(destdir, includedFiles[i]);
-                
+
                 File p = new File(d.getParent());
-                
+
                 if (!p.exists()) {
                     p.mkdirs();
                 }
-                
+
                 try {
                     destFileName = d.getCanonicalPath();
                     sourceFileName = f.getCanonicalPath();
-                    
+
                     if (sourceFileName.compareToIgnoreCase(destFileName) == 0) {
                         throw new BuildException("CompressHTML:  Destination directory is included in source <fileset>, which may overwrite files in your source.");
                     }
@@ -93,7 +93,7 @@ public class CompressJspTask extends Task {
                         System.out.println("Processing file: " + sourceFileName + "\n");
                     }
                     writeFile(d.toString(), compressHTML(readFile(f.toString(), null)), null);
-                    
+
                 } catch (Exception myException) {
                     throw new BuildException(myException.getMessage() + " while processing file " + sourceFileName);
                 }
@@ -102,17 +102,17 @@ public class CompressJspTask extends Task {
             System.out.println("Total blocks processed: " + compressor.getTotal() + ".   Failed: " + compressor.getFailed());
         }
     }
-       
+
     /**
      * Function called by the main execute function that does the actual compression of HTML
      * using the HTMLCompressor class.
      *
      * @param buffer This is the full HTML buffer to compress.
-     * @return Compressed html buffer     
+     * @return Compressed html buffer
      */
     private String compressHTML(String buffer) {
         String newHTML = null;
-    
+
         compressor.setEnabled(enabled); //if false all compression is off (default is true)
         compressor.setRemoveJspComments(removeJspComments);
         compressor.setRemoveComments(removeComments); //if false keeps HTML comments (default is true)
@@ -128,19 +128,19 @@ public class CompressJspTask extends Task {
         compressor.setYuiJsPreserveAllSemiColons(true);//--preserve-semi param for Yahoo YUI Compressor
         compressor.setDebugMode(debugMode);
         compressor.setFailOnError(failOnError);
-        
+
         // custom attribute to skip comments with Struts html:form TagElement
         compressor.setSkipStrutsFormComments(skipStrutsFormTagComments);
-        
+
         try {
             newHTML = compressor.compress(buffer);
         } catch (Exception q) {
             throw new BuildException(q.toString());
         }
-    
-        return(newHTML);
+
+        return (newHTML);
     }
-     
+
     private String readFile(String path, String encoding) {
         String finalString = null;
         try {
@@ -148,20 +148,20 @@ public class CompressJspTask extends Task {
             if (encoding == null) {
                 encoding = "utf-8";
             }
-            
+
             File file = new File(path);
-            
+
             BufferedReader input = new java.io.BufferedReader(new InputStreamReader(new FileInputStream(file), encoding));
-            
+
             try {
                 StringBuffer stringBuffer = new StringBuffer();
                 String line = input.readLine();
                 String lineSeparator = System.getProperty("line.separator");
-                
+
                 // Byte Order Mark (BOM) - The Unicode Standard, version 3.0, page
                 // 324
                 // http://www.unicode.org/faq/utf_bom.html
-                
+
                 // Note that when we use utf-8, the BOM should appear as "EF BB BF",
                 // but it doesn't due to this bug in the JDK:
                 // http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=4508058
@@ -173,13 +173,13 @@ public class CompressJspTask extends Task {
                     // only appear at the top of a file.
                     line = line.substring(1);
                 }
-                
+
                 while (line != null) {
                     stringBuffer.append(line);
                     stringBuffer.append(lineSeparator);
                     line = input.readLine();
                 }
-                
+
                 // Make sure we return a JavaScript string and not a Java string.
                 return stringBuffer.toString(); // String
             } finally {
@@ -190,8 +190,8 @@ public class CompressJspTask extends Task {
             throw new BuildException(e.toString());
         }
     }
-    
-    
+
+
     private void writeFile(String path, String contents, String encoding) {
         String finalString = null;
         try {
@@ -199,7 +199,7 @@ public class CompressJspTask extends Task {
             if (encoding == null) {
                 encoding = "utf-8";
             }
-            
+
             File file = new File(path);
             String lineSeparator = System.getProperty("line.separator");
             BufferedWriter output = new java.io.BufferedWriter(new OutputStreamWriter(new FileOutputStream(file), encoding));
@@ -215,92 +215,94 @@ public class CompressJspTask extends Task {
             //e.printStackTrace();
         }
     }
-    
+
     /**
-     * Sets the fileset property that signifies the collection of files to be compressed by this 
+     * Sets the fileset property that signifies the collection of files to be compressed by this
      * invocation of the task.
-     * 
+     *
      * @param set Ant FileSet object.
-     */     
-     
+     */
+
     public void addFileset(FileSet set) {
         filesets.addElement(set);
     }
- 
+
     /**
      * Sets the property that causes the compressor to remove JSP comments from the files processed.
-     * 
+     *
      * @param removeComments true if JSP comments should be removed, false otherwise.
-     */ 
-        
+     */
+
     public void setRemoveJspComments(boolean removeComments) {
         this.removeJspComments = removeComments;
     }
-    
-    
+
+
     /**
      * Sets the property that causes the compressor to remove HTML comments from the files processed.
-     * 
+     *
      * @param removeComments true if comments should be removed, false otherwise.
-     */ 
+     */
     public void setRemoveComments(boolean removeComments) {
         this.removeComments = removeComments;
     }
-    
+
     /**
-     * Sets the property that causes the compressor to compress inline Javascript with the YUI compressor.  
+     * Sets the property that causes the compressor to compress inline Javascript with the YUI compressor.
      * This is false by default.
-     * 
+     *
      * @param compress true if inline Javascript compression should be compressed, false otherwise.
-     */        
+     */
     public void setCompressJs(boolean compress) {
         this.compressJS = compress;
     }
-    
+
     /**
-     * Sets the property that causes the compressor compress CSS with the YUI compressor.  
+     * Sets the property that causes the compressor compress CSS with the YUI compressor.
      * This is true by default.
-     * 
+     *
      * @param compress true if CSS compression is to be used, false otherwise.
-     */       
+     */
     public void setCompressCSS(boolean compress) {
         this.compressCSS = compress;
     }
-    
+
     /**
      * Sets the destination directory in which processed files are deposited.
-     * 
+     *
      * @param destpath path of directory in which to deposit processed files
-     */    
+     */
     public void setDestDir(String destpath) {
         destdir = destpath;
     }
-    
+
     /**
-     * Sets the property that causes the compressor to leave HTML comments that 
+     * Sets the property that causes the compressor to leave HTML comments that
      * reference the Struts <html:form> tags.
-     * 
+     *
      * @param skipFormComments true if <html:form> comments are to be skipped, false if they should be removed.
-     */    
+     */
     public void setSkipStrutsFormComments(boolean skipFormComments) {
-       skipStrutsFormTagComments = skipFormComments;
+        skipStrutsFormTagComments = skipFormComments;
     }
 
     /**
      * Set debug mode for the module.  This will print diagnostic information as the tool runs.
-     * @param debug  If true, debugmode is set, otherwise it is not.
+     *
+     * @param debug If true, debugmode is set, otherwise it is not.
      */
     public void setDebug(boolean debug) {
-       this.debugMode = debug;
+        this.debugMode = debug;
     }
 
     /**
      * Enable compression.  True is the default.
-     * @param enabled  If set to false, this module will not do compression of the files, but will just move
-     * them like a copy would.
+     *
+     * @param enabled If set to false, this module will not do compression of the files, but will just move
+     *                them like a copy would.
      */
     public void setEnabled(boolean enabled) {
-       this.enabled = enabled;
+        this.enabled = enabled;
     }
 
     public void setFailOnError(boolean enabled) {
