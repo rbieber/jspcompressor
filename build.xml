@@ -41,7 +41,7 @@
         </copy>
         <jar destfile="${build.dir}/${jar.name}" basedir="${build.dir}/jar">
 			<manifest>
-				<attribute name="Main-Class" value="com.googlecode.jspcompressorCmdLineCompressor"/>
+				<attribute name="Main-Class" value="com.googlecode.jspcompressor.CmdLineCompressor"/>
 				<attribute name="Class-Path" value="yuicompressor-2.4.3.jar"/>
 			</manifest>
         </jar>
@@ -115,7 +115,7 @@
             <pathelement location="${build.dir}/jspcompressor-0.1.jar"/>
         </path>    
         <taskdef name="jspcompressor" classname="com.googlecode.jspcompressor.ant.task.CompressJspTask" classpathref="compressor-classpath"/>
-        <jspcompressor destdir="./tmp" debug="false" failonerror="false" compressjs="true" removecomments="true" removejspcomments="true" skipstrutsformcomments="true">
+        <jspcompressor destdir="./tmp" debug="false" failonerror="true" compressjs="true" removecomments="true" removejspcomments="true" skipstrutsformcomments="true">
             <fileset dir="testsrc" includes="**/*.jsp"/>
         </jspcompressor>
     </target>    

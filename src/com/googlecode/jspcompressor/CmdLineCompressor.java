@@ -56,6 +56,8 @@ public class CmdLineCompressor {
 		CmdLineParser.Option removeQuotesOpt = parser.addBooleanOption("remove-quotes");
 		CmdLineParser.Option compressJsOpt = parser.addBooleanOption("compress-js");
 		CmdLineParser.Option compressCssOpt = parser.addBooleanOption("compress-css");
+        CmdLineParser.Option removeJspComments = parser.addBooleanOption("remove-jsp-comments");
+        CmdLineParser.Option preserveStrutsFormComments = parser.addBooleanOption("preserve-struts-comments");
 
 		CmdLineParser.Option nomungeOpt = parser.addBooleanOption("nomunge");
 		CmdLineParser.Option linebreakOpt = parser.addStringOption("line-break");
@@ -142,21 +144,23 @@ public class CmdLineCompressor {
 			Compressor compressor = null;
 			if (type.equalsIgnoreCase("html")) {
 
-				JspCompressor htmlCompressor = new JspCompressor();
-				htmlCompressor.setRemoveComments(parser.getOptionValue(preserveCommentsOpt) == null);
-				htmlCompressor.setRemoveMultiSpaces(parser.getOptionValue(preserveMultiSpacesOpt) == null);
-				htmlCompressor.setRemoveIntertagSpaces(parser.getOptionValue(removeIntertagSpacesOpt) != null);
-				htmlCompressor.setRemoveQuotes(parser.getOptionValue(removeQuotesOpt) != null);
-				htmlCompressor.setCompressJavaScript(parser.getOptionValue(compressJsOpt) != null);
-				htmlCompressor.setCompressCss(parser.getOptionValue(compressCssOpt) != null);
+				JspCompressor jspCompressor = new JspCompressor();
+				jspCompressor.setRemoveComments(parser.getOptionValue(preserveCommentsOpt) == null);
+				jspCompressor.setRemoveMultiSpaces(parser.getOptionValue(preserveMultiSpacesOpt) == null);
+				jspCompressor.setRemoveIntertagSpaces(parser.getOptionValue(removeIntertagSpacesOpt) != null);
+				jspCompressor.setRemoveQuotes(parser.getOptionValue(removeQuotesOpt) != null);
+				jspCompressor.setCompressJavaScript(parser.getOptionValue(compressJsOpt) != null);
+				jspCompressor.setCompressCss(parser.getOptionValue(compressCssOpt) != null);
 
-				htmlCompressor.setYuiJsNoMunge(parser.getOptionValue(nomungeOpt) != null);
-				htmlCompressor.setYuiJsPreserveAllSemiColons(parser.getOptionValue(preserveSemiOpt) != null);
-				htmlCompressor.setYuiJsDisableOptimizations(parser.getOptionValue(disableOptimizationsOpt) != null);
-				htmlCompressor.setYuiJsLineBreak(linebreakpos);
-				htmlCompressor.setYuiCssLineBreak(linebreakpos);
+				jspCompressor.setYuiJsNoMunge(parser.getOptionValue(nomungeOpt) != null);
+				jspCompressor.setYuiJsPreserveAllSemiColons(parser.getOptionValue(preserveSemiOpt) != null);
+				jspCompressor.setYuiJsDisableOptimizations(parser.getOptionValue(disableOptimizationsOpt) != null);
+				jspCompressor.setYuiJsLineBreak(linebreakpos);
+				jspCompressor.setYuiCssLineBreak(linebreakpos);
+                jspCompressor.setSkipStrutsFormComments(preserveStrutsFormComments != null);
+                jspCompressor.setRemoveJspComments(removeJspComments != null);
 
-				compressor = htmlCompressor;
+				compressor = jspCompressor;
 
 			} else {
 
@@ -257,6 +261,9 @@ public class CmdLineCompressor {
 						+ "  --type <html|xml>           If not provided autodetects from file extension\n"
 						+ "  --charset <charset>         Read the input file using <charset>\n"
 						+ "  -h, --help                  Display this screen\n\n"
+                        + "JSP Options:\n"
+                        + "  --remove-jsp-comments       Remove JSP comments\n"
+                        + "  --preserve-struts-comments  Preserve <html:form> starting and ending tag comments.\n\n"
 
 						+ "XML Options:\n"
 						+ "  --preserve-comments         Preserve comments\n"
