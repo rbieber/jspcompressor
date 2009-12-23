@@ -112,7 +112,7 @@
     <target name="test" depends="build.jar">
        <path id="compressor-classpath">
             <pathelement location="${lib.dir}/yuicompressor-2.4.3.jar"/>
-            <pathelement location="${build.dir}/jspcompressor-0.1.jar"/>
+            <pathelement location="${build.dir}/${jar.name}"/>
         </path>    
         <taskdef name="jspcompressor" classname="com.googlecode.jspcompressor.ant.task.CompressJspTask" classpathref="compressor-classpath"/>
         <jspcompressor destdir="./tmp" debug="false" failonerror="true" compressjs="true" removecomments="true" removejspcomments="true" skipstrutsformcomments="true">
