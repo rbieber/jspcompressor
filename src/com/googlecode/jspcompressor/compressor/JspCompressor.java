@@ -73,6 +73,7 @@ public class JspCompressor implements Compressor {
     private static final String tempJSPAssignBlock = "%%%COMPRESS~JSPASSIGN~#%%%";
     private static final String tempStrutsFormCommentBlock = "%%%COMPRESS~STRUTSFORMCOMMENT~#%%%";
     private static final String tempJavaScriptBlock = "___COMPRESSJAVASCRIPTJSP_#___";
+    private static final String tempJavaScriptJSPELBlock = "___COMPRESSJAVASCRIPTJSPEL_#___";	
     private static final String tempJSTagBlock = "___COMPRESSJAVASCRIPTTAG_#___";
 
     //compiled regex patterns
@@ -100,6 +101,7 @@ public class JspCompressor implements Compressor {
     // JSP and js block patterns used to strip leading and trailing space, as well as empty lines.
     private static final Pattern jspAssignPattern = Pattern.compile("<%=.*?%>", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
     private static final Pattern jspPattern = Pattern.compile("<%[^-=@].*?%>", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
+    private static final Pattern jspELPattern = Pattern.compile("\\$\\{.*?\\}", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);	
     private static final Pattern jsLeadingSpacePattern = Pattern.compile("^[ \\t]+", Pattern.MULTILINE | Pattern.CASE_INSENSITIVE);
     private static final Pattern jsTrailingSpacePattern = Pattern.compile("[ \\t]+$", Pattern.MULTILINE | Pattern.CASE_INSENSITIVE);
     private static final Pattern jsEmptyLinePattern = Pattern.compile("^$\\n", Pattern.MULTILINE | Pattern.CASE_INSENSITIVE);
@@ -113,6 +115,7 @@ public class JspCompressor implements Compressor {
     private static final Pattern tempJSPAssignPattern = Pattern.compile("%%%COMPRESS~JSPASSIGN~(\\d+?)%%%", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
     private static final Pattern tempStrutsFormCommentPattern = Pattern.compile("%%%COMPRESS~STRUTSFORMCOMMENT~(\\d+?)%%%", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
     private static final Pattern tempJavaScriptJSPPattern = Pattern.compile("___COMPRESSJAVASCRIPTJSP_(\\d+?)___", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
+    private static final Pattern tempJavaScriptJSPELPattern = Pattern.compile("___COMPRESSJAVASCRIPTJSPEL_(\\d+?)___", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);	
     private static final Pattern tempJSTagPattern = Pattern.compile("___COMPRESSJAVASCRIPTTAG_(\\d+?)___", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
 
     
@@ -269,6 +272,7 @@ public class JspCompressor implements Compressor {
     
     private void processScriptBlocks(List<String> scriptBlocks) throws Exception {
         List<String> jspBlocks = new ArrayList<String>();
+        List<String> jspELBlocks = new ArrayList<String>();
 
         int originalSourceLength = 0,
             compressionRatio = 0;
@@ -291,6 +295,8 @@ public class JspCompressor implements Compressor {
 			            
             scriptBlock = preserveBlocks(scriptBlock, jspAllPattern, tempJavaScriptBlock, jspBlocks);
 
+            scriptBlock = preserveBlocks(scriptBlock, jspELPattern, tempJavaScriptJSPELBlock, jspELBlocks);	
+
             if (!compressJavaScript) {
                 scriptBlock = trimEmptySpace(scriptBlock);
             } else {
@@ -299,6 +305,8 @@ public class JspCompressor implements Compressor {
 
             scriptBlock = returnBlocks(scriptBlock, tempJavaScriptJSPPattern, jspBlocks);
 
+            scriptBlock = returnBlocks(scriptBlock, tempJavaScriptJSPELPattern, jspELBlocks);
+			
             // Calculate compresion ratio achieved.
             compressionRatio = compressionRatio(originalSourceLength, scriptBlock.length());
 
@@ -310,7 +318,9 @@ public class JspCompressor implements Compressor {
             }
             
             scriptBlocks.set(i, scriptBlock);
-            jspBlocks.clear();  // clear jsp blocks collection for the next iteration.
+			// clear jsp blocks collection for the next iteration.
+            jspBlocks.clear();  
+			jspELBlocks.clear();
         }
 
     }
