@@ -318,9 +318,9 @@ public class JspCompressor implements Compressor {
             }
             
             scriptBlocks.set(i, scriptBlock);
-			// clear jsp blocks collection for the next iteration.
+            // clear jsp blocks collection for the next iteration.
             jspBlocks.clear();  
-			jspELBlocks.clear();
+            jspELBlocks.clear();
         }
 
     }
