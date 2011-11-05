@@ -373,8 +373,9 @@ public class JspCompressor implements Compressor {
 
         //check if block is not empty
         Matcher scriptMatcher = scriptPatternNonEmpty.matcher(source);
- 
-        if(scriptMatcher.find()) {
+
+        // don't compress script blocks that have a src attribute AND something in the body. 
+        if(scriptMatcher.find() && source.indexOf("src=", 0) == -1) {
             
             //call YUICompressor
             try {
