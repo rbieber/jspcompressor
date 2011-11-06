@@ -375,36 +375,40 @@ public class JspCompressor implements Compressor {
         Matcher scriptMatcher = scriptPatternNonEmpty.matcher(source);
 
         // don't compress script blocks that have a src attribute AND something in the body. 
-        if(scriptMatcher.find() && source.indexOf("src=", 0) == -1) {
-            
-            //call YUICompressor
-            try {
-                List<String> tagBlocks = new ArrayList<String>();
+        if(scriptMatcher.find()) {
 
-                scriptBlock = scriptMatcher.group(1);
-                scriptBlock = preserveBlocks(scriptBlock, jsTagPattern, tempJSTagBlock, tagBlocks);
+            if (source.indexOf("src=") == -1) {
+                //call YUICompressor
+                try {
+                    List<String> tagBlocks = new ArrayList<String>();
 
-                if (debugMode) {
-                    int v = 0;
-                    for (String q : tagBlocks) {
-                        System.out.println(Integer.toString(v) + ":  " + q);
-                        v++;
+                    scriptBlock = scriptMatcher.group(1);
+                    scriptBlock = preserveBlocks(scriptBlock, jsTagPattern, tempJSTagBlock, tagBlocks);
+
+                    if (debugMode) {
+                        int v = 0;
+                        for (String q : tagBlocks) {
+                            System.out.println(Integer.toString(v) + ":  " + q);
+                            v++;
+                        }
+
+                        System.out.println("Compressing:  " + scriptBlock);
                     }
 
-                    System.out.println("Compressing:  " + scriptBlock);
-                }
-                
-                JavaScriptCompressor compressor = new JavaScriptCompressor(new StringReader(scriptBlock), null);
-                compressor.compress(result, yuiJsLineBreak, !yuiJsNoMunge, false, yuiJsPreserveAllSemiColons, yuiJsDisableOptimizations);
-            
-                scriptBlock = returnBlocks(result.toString(), tempJSTagPattern, tagBlocks);    
-            } catch (Exception e) {
-                failed++;
-                
-                if (failOnError) {
-                    throw new Exception("Returning " + scriptBlock);
-                }
+                    JavaScriptCompressor compressor = new JavaScriptCompressor(new StringReader(scriptBlock), null);
+                    compressor.compress(result, yuiJsLineBreak, !yuiJsNoMunge, false, yuiJsPreserveAllSemiColons, yuiJsDisableOptimizations);
 
+                    scriptBlock = returnBlocks(result.toString(), tempJSTagPattern, tagBlocks);
+                } catch (Exception e) {
+                    failed++;
+
+                    if (failOnError) {
+                        throw new Exception("Returning " + scriptBlock);
+                    }
+
+                    return(trimEmptySpace(originalSource));
+                }
+            } else {
                 return(trimEmptySpace(originalSource));
             }
 
