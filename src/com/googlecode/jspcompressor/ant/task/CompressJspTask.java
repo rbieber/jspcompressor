@@ -40,6 +40,7 @@ public class CompressJspTask extends Task {
     private boolean debugMode = false;
     private boolean enabled = true;
     private boolean failOnError = false;
+    private boolean skipMotionPointDirective = true;    
 
     private JspCompressor compressor = new JspCompressor();
 
@@ -131,6 +132,9 @@ public class CompressJspTask extends Task {
 
         // custom attribute to skip comments with Struts html:form TagElement
         compressor.setSkipStrutsFormComments(skipStrutsFormTagComments);
+        
+        // custom attribute to skip motion point directives. SHOP-3810
+        compressor.setSkipMotionPointDirective(skipMotionPointDirective);
 
         try {
             newHTML = compressor.compress(buffer);
@@ -285,8 +289,16 @@ public class CompressJspTask extends Task {
     public void setSkipStrutsFormComments(boolean skipFormComments) {
         skipStrutsFormTagComments = skipFormComments;
     }
-
+    
+    
     /**
+	 * @param skipMotionPointDirective the skipMotionPointDirective to set
+	 */
+	public void setSkipMotionPointDirective(boolean skipMotionPointDirective) {
+		this.skipMotionPointDirective = skipMotionPointDirective;
+	}
+
+	/**
      * Set debug mode for the module.  This will print diagnostic information as the tool runs.
      *
      * @param debug If true, debugmode is set, otherwise it is not.

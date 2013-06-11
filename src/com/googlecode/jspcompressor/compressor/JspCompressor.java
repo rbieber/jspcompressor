@@ -48,6 +48,7 @@ public class JspCompressor implements Compressor {
     private boolean removeJspComments = true;
     private boolean removeMultiSpaces = true;
     private boolean skipCommentsWithStrutsForm = false;
+    private boolean skipMotionPointDirective = true;
     
     //optional settings
     private boolean removeIntertagSpaces = false;
@@ -75,6 +76,7 @@ public class JspCompressor implements Compressor {
     private static final String tempJavaScriptBlock = "___COMPRESSJAVASCRIPTJSP_#___";
     private static final String tempJavaScriptJSPELBlock = "___COMPRESSJAVASCRIPTJSPEL_#___";	
     private static final String tempJSTagBlock = "___COMPRESSJAVASCRIPTTAG_#___";
+    private static final String tempMotionPointDirectivesBlock = "%%%COMPRESS~MOTIONPOINTDIRECTIVE~#%%%";
 
     //compiled regex patterns
     // The commentStrutsFormHack pattern purposely excludes any comment with <html:form> in it due to a work around
@@ -92,6 +94,7 @@ public class JspCompressor implements Compressor {
     private static final Pattern stylePattern = Pattern.compile("<style[^>]*?>.*?</style>", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
     private static final Pattern scriptPatternNonEmpty = Pattern.compile("<script[^>]*?>(.+?)</script>", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
     private static final Pattern stylePatternNonEmpty = Pattern.compile("<style[^>]*?>(.+?)</style>", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
+    private static final Pattern motionPointDirectivePattern = Pattern.compile("<!-- *mp.*-->", Pattern.CASE_INSENSITIVE);
     /*
      * Ok, I know this is retarded, but I am specifically looking for custom tags that are namespaced, which I know we use in our code.
      * I'm assuming this would be true for all JSP programming, but I'm not sure.
@@ -117,7 +120,7 @@ public class JspCompressor implements Compressor {
     private static final Pattern tempJavaScriptJSPPattern = Pattern.compile("___COMPRESSJAVASCRIPTJSP_(\\d+?)___", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
     private static final Pattern tempJavaScriptJSPELPattern = Pattern.compile("___COMPRESSJAVASCRIPTJSPEL_(\\d+?)___", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);	
     private static final Pattern tempJSTagPattern = Pattern.compile("___COMPRESSJAVASCRIPTTAG_(\\d+?)___", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
-
+    private static final Pattern tempMotionPointDirectivePattern = Pattern.compile("%%%COMPRESS~MOTIONPOINTDIRECTIVE~(\\d+?)%%%", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
     
     /**
      * The main method that compresses given HTML source and returns compressed result.
@@ -140,9 +143,10 @@ public class JspCompressor implements Compressor {
         List<String> jspBlocks = new ArrayList<String>();
         List<String> jspAssignBlocks = new ArrayList<String>();
         List<String> strutsFormCommentBlocks = new ArrayList<String>();
+        List<String> motionPointDirectiveBlocks = new ArrayList<String>();
         
         //preserve blocks
-        html = preserveBlocks(html, preBlocks, taBlocks, scriptBlocks, styleBlocks, jspBlocks, jspAssignBlocks, strutsFormCommentBlocks);
+        html = preserveBlocks(html, preBlocks, taBlocks, scriptBlocks, styleBlocks, jspBlocks, jspAssignBlocks, strutsFormCommentBlocks,motionPointDirectiveBlocks);
 
         //process pure html
         html = processHtml(html);
@@ -153,7 +157,7 @@ public class JspCompressor implements Compressor {
         processJSPBlocks(jspBlocks);
         
         //put blocks back
-        html = returnBlocks(html, preBlocks, taBlocks, scriptBlocks, styleBlocks, jspBlocks, jspAssignBlocks, strutsFormCommentBlocks);
+        html = returnBlocks(html, preBlocks, taBlocks, scriptBlocks, styleBlocks, jspBlocks, jspAssignBlocks, strutsFormCommentBlocks,motionPointDirectiveBlocks);
         
         return html.trim();
     }
@@ -196,8 +200,16 @@ public class JspCompressor implements Compressor {
                                   List<String> styleBlocks,
                                   List<String>jspBlocks,
                                   List<String>jspAssignBlocks,
-                                  List<String> strutsFormCommentBlocks) {
-        
+                                  List<String> strutsFormCommentBlocks,
+                                  List<String> motionPointDirectiveBlocks) {
+        /*
+         * Preserve the motion point directives first and return the motionpoint blocks the last.
+         * This is because motionpoint directives can be inside inline javascript in jsp.
+         * If this order is changed then the motion point directives inside inline javascript will be lost
+         */
+        if (skipMotionPointDirective) {
+            html = preserveBlocks(html, motionPointDirectivePattern, tempMotionPointDirectivesBlock, motionPointDirectiveBlocks);
+        } 
         // preserve JSP variable references
         html = preserveBlocks(html, scriptPattern, tempScriptBlock, scriptBlocks);
         html = preserveBlocks(html, jspAssignPattern, tempJSPAssignBlock, jspAssignBlocks);
@@ -208,8 +220,7 @@ public class JspCompressor implements Compressor {
 
         if (skipCommentsWithStrutsForm) {
             html = preserveBlocks(html, commentStrutsFormCommentPattern, tempStrutsFormCommentBlock, strutsFormCommentBlocks);
-        }          
-    
+        }
         return(html);
     }
     
@@ -220,7 +231,8 @@ public class JspCompressor implements Compressor {
                                 List<String> styleBlocks,
                                 List<String> jspBlocks,
                                 List<String> jspAssignBlocks,
-                                List<String> strutsFormCommentBlocks) {
+                                List<String> strutsFormCommentBlocks,
+                                List<String> motionPointDirectiveBlocks) {
 
         html = returnBlocks(html, tempStrutsFormCommentPattern, strutsFormCommentBlocks); 
         html = returnBlocks(html, tempTextAreaPattern, taBlocks);
@@ -230,6 +242,7 @@ public class JspCompressor implements Compressor {
         html = returnBlocks(html, tempJSPPattern, jspBlocks);      
         html = returnBlocks(html, tempJSPAssignPattern, jspAssignBlocks);  
         html = returnBlocks(html, tempScriptPattern, scriptBlocks);
+        html = returnBlocks(html, tempMotionPointDirectivePattern, motionPointDirectiveBlocks);
          
         
         //remove inter-tag spaces
@@ -777,8 +790,15 @@ public class JspCompressor implements Compressor {
     public void setSkipStrutsFormComments(boolean leaveComments) {
        skipCommentsWithStrutsForm = leaveComments;
     }
-
+    
     /**
+	 * @param skipMotionPointDirective the skipMotionPointDirective to set
+	 */
+	public void setSkipMotionPointDirective(boolean skipMotionPointDirective) {
+		this.skipMotionPointDirective = skipMotionPointDirective;
+	}
+
+	/**
      * If set to <code>true</code> the compressor will display debug messages as it works.
      */     
     public void setDebugMode(boolean debugMode) {
